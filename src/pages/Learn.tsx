@@ -1,7 +1,8 @@
+import { L } from '../i18n';
 import { useEffect, useState } from 'react';
 import { BookOpen, Check, Crown, Swords } from 'lucide-react';
-import { DRILLS, LESSON_GROUPS, LESSON_TARGET, LESSONS } from '../lib/lessons';
-import { OPENINGS } from '../lib/openings';
+import { DRILLS, groupLabel, LESSON_GROUPS, LESSON_TARGET, LESSONS, levelLabel } from '../lib/lessons';
+import { familyLabel, OPENINGS } from '../lib/openings';
 import { store, type LessonProgress, type OpeningProgress } from '../lib/data';
 import { BOTS } from '../bots';
 import { navigate } from '../router';
@@ -50,29 +51,29 @@ export function Learn({ param, onPractice, ...page }: Props) {
       <header className="page-head">
         <BookOpen size={26} />
         <div>
-          <h1>Lernen</h1>
+          <h1>{L('Lernen', 'Learn')}</h1>
           <p>
-            {doneLessons} von {LESSONS.length} Lektionen abgeschlossen · {doneOpenings} von {OPENINGS.length} Eröffnungen gemeistert
+            {L(`${doneLessons} von ${LESSONS.length} Lektionen abgeschlossen · ${doneOpenings} von ${OPENINGS.length} Eröffnungen gemeistert`, `${doneLessons} of ${LESSONS.length} lessons completed · ${doneOpenings} of ${OPENINGS.length} openings mastered`)}
           </p>
         </div>
       </header>
 
       <div className="tabs">
         <button className={tab === 'lessons' ? 'on' : ''} onClick={() => setTab('lessons')}>
-          Lektionen
+          {L('Lektionen', 'Lessons')}
         </button>
         <button className={tab === 'openings' ? 'on' : ''} onClick={() => setTab('openings')}>
-          Eröffnungen
+          {L('Eröffnungen', 'Openings')}
         </button>
         <button className={tab === 'endgames' ? 'on' : ''} onClick={() => setTab('endgames')}>
-          Endspieltechnik
+          {L('Endspieltechnik', 'Endgame technique')}
         </button>
       </div>
 
       {tab === 'lessons' &&
         LESSON_GROUPS.map((g) => (
           <section key={g} className="card-section">
-            <h2>{g}</h2>
+            <h2>{groupLabel(g)}</h2>
             <div className="card-grid">
               {LESSONS.filter((l) => l.group === g).map((l) => {
                 const p = lp(l.id);
@@ -80,7 +81,7 @@ export function Learn({ param, onPractice, ...page }: Props) {
                 return (
                   <button key={l.id} className={`learn-card ${p?.completed ? 'done' : ''}`} onClick={() => navigate(`learn/lesson:${l.id}`)}>
                     <div className="learn-card-top">
-                      <span className={`level-tag ${l.level}`}>{l.level}</span>
+                      <span className={`level-tag ${l.level}`}>{levelLabel(l.level)}</span>
                       {p?.completed && (
                         <span className="done-badge">
                           <Check size={13} strokeWidth={3.5} />
@@ -93,7 +94,7 @@ export function Learn({ param, onPractice, ...page }: Props) {
                       <i style={{ width: `${pct * 100}%` }} />
                     </div>
                     <span className="learn-meta">
-                      {Math.min(p?.solved ?? 0, LESSON_TARGET)}/{LESSON_TARGET} Übungen
+                      {Math.min(p?.solved ?? 0, LESSON_TARGET)}/{LESSON_TARGET} {L('Übungen', 'exercises')}
                     </span>
                   </button>
                 );
@@ -105,7 +106,7 @@ export function Learn({ param, onPractice, ...page }: Props) {
       {tab === 'openings' &&
         (['Offene Spiele (1.e4 e5)', 'Halboffene Spiele (1.e4 andere)', 'Geschlossene Spiele (1.d4)', 'Flankeneröffnungen'] as const).map((fam) => (
           <section key={fam} className="card-section">
-            <h2>{fam}</h2>
+            <h2>{familyLabel(fam)}</h2>
             <div className="card-grid">
               {OPENINGS.filter((o) => o.family === fam).map((o) => {
                 const p = op(o.id);
@@ -114,7 +115,7 @@ export function Learn({ param, onPractice, ...page }: Props) {
                     <div className="learn-card-top">
                       <span className="eco">{o.eco}</span>
                       <span className="side-tag">
-                        <Piece type="k" color={o.side} size={18} /> {o.side === 'w' ? 'Weiß' : 'Schwarz'}
+                        <Piece type="k" color={o.side} size={18} /> {o.side === 'w' ? L('Weiß', 'White') : L('Schwarz', 'Black')}
                       </span>
                       {!!p?.perfect && (
                         <span className="done-badge">
@@ -124,7 +125,7 @@ export function Learn({ param, onPractice, ...page }: Props) {
                     </div>
                     <b>{o.name}</b>
                     <span className="learn-sum mono">{o.moves.slice(0, 6).map((m, i) => (i % 2 === 0 ? `${i / 2 + 1}.${m}` : m)).join(' ')} …</span>
-                    <span className="learn-meta">{p ? `${p.runs}× geübt · ${p.perfect}× fehlerfrei` : 'Noch nicht geübt'}</span>
+                    <span className="learn-meta">{p ? L(`${p.runs}× geübt · ${p.perfect}× fehlerfrei`, `practiced ${p.runs}× · ${p.perfect}× perfect`) : L('Noch nicht geübt', 'Not practiced yet')}</span>
                   </button>
                 );
               })}
@@ -134,8 +135,8 @@ export function Learn({ param, onPractice, ...page }: Props) {
 
       {tab === 'endgames' && (
         <section className="card-section">
-          <h2>Gegen Stockfish in voller Stärke</h2>
-          <p className="section-hint">Grundlegende Gewinntechniken. Stockfish verteidigt perfekt – der Coach hilft dir mit Hinweisen und erklärt deine Züge.</p>
+          <h2>{L('Gegen Stockfish in voller Stärke', 'Against full-strength Stockfish')}</h2>
+          <p className="section-hint">{L('Grundlegende Gewinntechniken. Stockfish verteidigt perfekt – der Coach hilft dir mit Hinweisen und erklärt deine Züge.', 'Basic winning techniques. Stockfish defends perfectly – the coach helps with hints and explains your moves.')}</p>
           <div className="card-grid">
             {DRILLS.map((d) => (
               <button
@@ -154,13 +155,13 @@ export function Learn({ param, onPractice, ...page }: Props) {
               >
                 <div className="learn-card-top">
                   <span className="level-tag Fortgeschritten">
-                    <Crown size={12} /> Technik
+                    <Crown size={12} /> {L('Technik', 'Technique')}
                   </span>
                 </div>
                 <b>{d.title}</b>
                 <span className="learn-sum">{d.summary}</span>
                 <span className="learn-meta">
-                  <Swords size={13} /> Gegen Stockfish üben
+                  <Swords size={13} /> {L('Gegen Stockfish üben', 'Practice vs Stockfish')}
                 </span>
               </button>
             ))}

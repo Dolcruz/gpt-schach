@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
+import { T } from './i18n.ts';
 
 export const CLIENT_ID = 'app_EMoamEEZ73f0CkXaXp7hrann';
 const ISSUER = 'https://auth.openai.com';
@@ -75,10 +76,10 @@ export function logout() {
 /** Übernimmt einen bestehenden Login der Codex CLI / Codex App (~/.codex/auth.json). */
 export function importCodex(): AuthInfo {
   const file = path.join(process.env.CODEX_HOME ?? path.join(os.homedir(), '.codex'), 'auth.json');
-  if (!fs.existsSync(file)) throw new Error('Keine Codex-Anmeldung gefunden (~/.codex/auth.json fehlt).');
+  if (!fs.existsSync(file)) throw new Error(T('Keine Codex-Anmeldung gefunden (~/.codex/auth.json fehlt).', 'No Codex login found (~/.codex/auth.json is missing).'));
   const raw = JSON.parse(fs.readFileSync(file, 'utf8'));
   const t = raw.tokens;
-  if (!t?.access_token || !t?.refresh_token) throw new Error('Codex ist nicht mit einem ChatGPT-Konto angemeldet.');
+  if (!t?.access_token || !t?.refresh_token) throw new Error(T('Codex ist nicht mit einem ChatGPT-Konto angemeldet.', 'Codex is not signed in with a ChatGPT account.'));
   const next: Tokens = { id_token: t.id_token, access_token: t.access_token, refresh_token: t.refresh_token, account_id: t.account_id, source: 'codex' };
   next.account_id ||= claims(next).accountId ?? '';
   save(next);
@@ -120,30 +121,30 @@ function ensureCallbackServer(appUrl: string): Promise<void> {
       const page = (title: string, body: string) =>
         `<!doctype html><meta charset="utf-8"><title>${title}</title><body style="font-family:system-ui;background:#262421;color:#eee;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center"><h2>${title}</h2><p>${body}</p></div></body>`;
       try {
-        if (!pendingLogin || url.searchParams.get('state') !== pendingLogin.state) throw new Error('Ungültiger Login-Status – bitte erneut versuchen.');
+        if (!pendingLogin || url.searchParams.get('state') !== pendingLogin.state) throw new Error(T('Ungültiger Login-Status – bitte erneut versuchen.', 'Invalid login state – please try again.'));
         const code = url.searchParams.get('code');
-        if (!code) throw new Error(url.searchParams.get('error_description') ?? 'Kein Code erhalten.');
+        if (!code) throw new Error(url.searchParams.get('error_description') ?? T('Kein Code erhalten.', 'No code received.'));
         const r = await fetch(`${ISSUER}/oauth/token`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: REDIRECT_URI, client_id: CLIENT_ID, code_verifier: pendingLogin.verifier }),
         });
-        if (!r.ok) throw new Error(`Token-Austausch fehlgeschlagen (${r.status}): ${await r.text()}`);
+        if (!r.ok) throw new Error(`${T('Token-Austausch fehlgeschlagen', 'Token exchange failed')} (${r.status}): ${await r.text()}`);
         const j: any = await r.json();
         const next: Tokens = { id_token: j.id_token, access_token: j.access_token, refresh_token: j.refresh_token, account_id: '', source: 'oauth' };
         next.account_id = claims(next).accountId ?? '';
         save(next);
         pendingLogin = null;
         res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }).end(
-          page('Angemeldet ✓', `Du kannst dieses Fenster schließen. <script>setTimeout(()=>{location.href=${JSON.stringify(appUrl)}},1200)</script>`),
+          page(T('Angemeldet ✓', 'Signed in ✓'), `${T('Du kannst dieses Fenster schließen.', 'You can close this window.')} <script>setTimeout(()=>{location.href=${JSON.stringify(appUrl)}},1200)</script>`),
         );
         setTimeout(closeCallbackServer, 500);
       } catch (e: any) {
-        res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' }).end(page('Login fehlgeschlagen', String(e.message ?? e)));
+        res.writeHead(400, { 'Content-Type': 'text/html; charset=utf-8' }).end(page(T('Login fehlgeschlagen', 'Login failed'), String(e.message ?? e)));
       }
     });
     srv.once('error', (e: any) =>
-      reject(new Error(e.code === 'EADDRINUSE' ? `Port ${CALLBACK_PORT} ist belegt (läuft gerade ein Codex-Login?).` : e.message)),
+      reject(new Error(e.code === 'EADDRINUSE' ? T(`Port ${CALLBACK_PORT} ist belegt (läuft gerade ein Codex-Login?).`, `Port ${CALLBACK_PORT} is busy (is a Codex login running right now?).`) : e.message)),
     );
     srv.listen(CALLBACK_PORT, '127.0.0.1', () => {
       callbackServer = srv;
@@ -165,7 +166,7 @@ function expiresSoon(t: Tokens) {
 let refreshing: Promise<void> | null = null;
 
 export async function refresh(): Promise<void> {
-  if (!tokens) throw new Error('Nicht angemeldet');
+  if (!tokens) throw new Error(T('Nicht angemeldet', 'Not signed in'));
   refreshing ??= (async () => {
     const r = await fetch(`${ISSUER}/oauth/token`, {
       method: 'POST',
@@ -178,7 +179,7 @@ export async function refresh(): Promise<void> {
         importCodex();
         if (!expiresSoon(tokens!)) return;
       }
-      throw new Error(`Token-Refresh fehlgeschlagen (${r.status}). Bitte neu anmelden.`);
+      throw new Error(T(`Token-Refresh fehlgeschlagen (${r.status}). Bitte neu anmelden.`, `Token refresh failed (${r.status}). Please sign in again.`));
     }
     const j: any = await r.json();
     save({ ...tokens!, access_token: j.access_token ?? tokens!.access_token, id_token: j.id_token ?? tokens!.id_token, refresh_token: j.refresh_token ?? tokens!.refresh_token });
@@ -187,7 +188,7 @@ export async function refresh(): Promise<void> {
 }
 
 export async function authHeaders(): Promise<Record<string, string>> {
-  if (!tokens) throw Object.assign(new Error('Nicht angemeldet'), { status: 401 });
+  if (!tokens) throw Object.assign(new Error(T('Nicht angemeldet', 'Not signed in')), { status: 401 });
   if (expiresSoon(tokens)) await refresh();
   return {
     Authorization: `Bearer ${tokens!.access_token}`,

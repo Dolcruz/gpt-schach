@@ -1,3 +1,4 @@
+import { L } from '../i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Check, Flame, Microscope, RotateCcw, Timer, Trophy, X, Zap } from 'lucide-react';
 import { Board } from '../components/Board';
@@ -18,7 +19,7 @@ function tierFor(solved: number) {
 async function fetchBatch(difficulty: string): Promise<PuzzleData[]> {
   const r = await fetch(`/api/puzzle/pool?difficulty=${difficulty}&n=3`);
   const j = await r.json();
-  if (!r.ok) throw new Error(j.error ?? 'Aufgaben konnten nicht geladen werden');
+  if (!r.ok) throw new Error(j.error ?? L('Aufgaben konnten nicht geladen werden', 'Could not load puzzles'));
   return j;
 }
 
@@ -150,11 +151,11 @@ export function Rush({ seconds }: { seconds: number }) {
           </span>
           <div className="player-info">
             <div className="player-name">
-              <b>Puzzle Rush · {seconds / 60} {seconds === 60 ? 'Minute' : 'Minuten'}</b>
+              <b>Puzzle Rush · {seconds / 60} {seconds === 60 ? L('Minute', 'minute') : L('Minuten', 'minutes')}</b>
               {puzzle && phase === 'running' && <span className="rating">({puzzle.rating})</span>}
             </div>
             <div className="bar-sub">
-              <span className="muted-text">{phase === 'running' && puzzle ? `${puzzle.color === 'w' ? 'Weiß' : 'Schwarz'} am Zug` : 'So viele Aufgaben wie möglich – 3 Fehler und vorbei'}</span>
+              <span className="muted-text">{phase === 'running' && puzzle ? L(`${puzzle.color === 'w' ? 'Weiß' : 'Schwarz'} am Zug`, `${puzzle.color === 'w' ? 'White' : 'Black'} to move`) : L('So viele Aufgaben wie möglich – 3 Fehler und vorbei', 'As many puzzles as possible – 3 mistakes and you are out')}</span>
             </div>
           </div>
         </div>
@@ -175,25 +176,25 @@ export function Rush({ seconds }: { seconds: number }) {
                   <>
                     <div className="over-head">
                       <Trophy size={26} />
-                      <h2>{score} gelöst</h2>
-                      <p>{newBest ? 'Neuer Rekord!' : best ? `Dein Rekord: ${best}` : 'Erster Lauf'}</p>
+                      <h2>{score} {L('gelöst', 'solved')}</h2>
+                      <p>{newBest ? L('Neuer Rekord!', 'New personal best!') : best ? L(`Dein Rekord: ${best}`, `Your best: ${best}`) : L('Erster Lauf', 'First run')}</p>
                     </div>
                     <div className="rush-summary">
                       <div>
-                        <span>Fehler</span>
+                        <span>{L('Fehler', 'Mistakes')}</span>
                         <b>{errors}</b>
                       </div>
                       <div>
-                        <span>Schwerste gelöst</span>
+                        <span>{L('Schwerste gelöst', 'Hardest solved')}</span>
                         <b>{Math.max(0, ...results.filter((r) => r.ok).map((r) => r.p.rating)) || '–'}</b>
                       </div>
                     </div>
                     <div className="over-btns">
                       <button className="btn primary block" onClick={start}>
-                        <RotateCcw size={16} /> Nochmal
+                        <RotateCcw size={16} /> {L('Nochmal', 'Again')}
                       </button>
                       <button className="btn block" onClick={() => navigate('bullet')}>
-                        <ArrowLeft size={16} /> Zum Bullet-Training
+                        <ArrowLeft size={16} /> {L('Zum Bullet-Training', 'Back to bullet training')}
                       </button>
                     </div>
                   </>
@@ -203,13 +204,13 @@ export function Rush({ seconds }: { seconds: number }) {
                       <Zap size={26} />
                       <h2>Puzzle Rush</h2>
                       <p>
-                        {seconds / 60} {seconds === 60 ? 'Minute' : 'Minuten'} · 3 Fehler und vorbei · Aufgaben werden immer schwerer
+                        {seconds / 60} {seconds === 60 ? L('Minute', 'minute') : L('Minuten', 'minutes')} · {L('3 Fehler und vorbei · Aufgaben werden immer schwerer', '3 mistakes and out · puzzles keep getting harder')}
                       </p>
                     </div>
                     {error && <p className="err-text" style={{ padding: '0 18px' }}>{error}</p>}
                     <div className="over-btns">
                       <button className="btn primary block xl" onClick={start} disabled={phase !== 'ready'}>
-                        {phase === 'ready' ? 'Los!' : 'Lade Aufgaben …'}
+                        {phase === 'ready' ? L('Los!', 'Go!') : L('Lade Aufgaben …', 'Loading puzzles …')}
                       </button>
                     </div>
                   </>
@@ -222,8 +223,8 @@ export function Rush({ seconds }: { seconds: number }) {
           <Avatar id="you" size={40} />
           <div className="player-info">
             <div className="player-name">
-              <b>Du</b>
-              <span className="rating">Rekord {best}</span>
+              <b>{L('Du', 'You')}</b>
+              <span className="rating">{L('Rekord', 'Best')} {best}</span>
             </div>
           </div>
         </div>
@@ -231,7 +232,7 @@ export function Rush({ seconds }: { seconds: number }) {
 
       <section className="panel">
         <header className="panel-head">
-          <button className="head-back" onClick={() => navigate('bullet')} title="Zurück">
+          <button className="head-back" onClick={() => navigate('bullet')} title={L('Zurück', 'Back')}>
             <ArrowLeft size={18} />
           </button>
           <Zap size={21} />
@@ -244,11 +245,11 @@ export function Rush({ seconds }: { seconds: number }) {
           </div>
           <div className="rush-stats">
             <div className="rush-score">
-              <span>Gelöst</span>
+              <span>{L('Gelöst', 'Solved')}</span>
               <b>{score}</b>
             </div>
             <div className="rush-errors">
-              <span>Fehler</span>
+              <span>{L('Fehler', 'Mistakes')}</span>
               <div>
                 {Array.from({ length: MAX_ERRORS }, (_, i) => (
                   <i key={i} className={i < errors ? 'hit' : ''}>
@@ -264,8 +265,8 @@ export function Rush({ seconds }: { seconds: number }) {
                 <Piece type="k" color={puzzle.color} size={30} />
               </span>
               <div>
-                <b>{puzzle.color === 'w' ? 'Weiß' : 'Schwarz'} am Zug</b>
-                <span>Finde den besten Zug – schnell!</span>
+                <b>{L(`${puzzle.color === 'w' ? 'Weiß' : 'Schwarz'} am Zug`, `${puzzle.color === 'w' ? 'White' : 'Black'} to move`)}</b>
+                <span>{L('Finde den besten Zug – schnell!', 'Find the best move – fast!')}</span>
               </div>
             </div>
           )}
@@ -275,10 +276,10 @@ export function Rush({ seconds }: { seconds: number }) {
             {[...results].reverse().map((r, i) => (
               <div key={results.length - i} className={`rush-item ${r.ok ? 'ok' : 'fail'}`}>
                 <span className="ri-icon">{r.ok ? <Check size={14} strokeWidth={3.5} /> : <X size={14} strokeWidth={3.5} />}</span>
-                <span>Aufgabe {results.length - i}</span>
+                <span>{L('Aufgabe', 'Puzzle')} {results.length - i}</span>
                 <span className="ri-rating">{r.p.rating}</span>
                 {phase === 'done' && (
-                  <button className="icon-btn" title="Analysieren" onClick={() => navigate(`analysis/fen:${encodeURIComponent(r.p.fen)}`)}>
+                  <button className="icon-btn" title={L('Analysieren', 'Analyze')} onClick={() => navigate(`analysis/fen:${encodeURIComponent(r.p.fen)}`)}>
                     <Microscope size={15} />
                   </button>
                 )}
@@ -286,7 +287,7 @@ export function Rush({ seconds }: { seconds: number }) {
             ))}
             {!results.length && (
               <p className="hint-text">
-                <Flame size={14} style={{ verticalAlign: -2, color: 'var(--green)' }} /> Tipp: Im Rush zählt Mustererkennung. Schau zuerst auf Schachs, Schlagzüge und Drohungen.
+                <Flame size={14} style={{ verticalAlign: -2, color: 'var(--green)' }} /> {L('Tipp: Im Rush zählt Mustererkennung. Schau zuerst auf Schachs, Schlagzüge und Drohungen.', 'Tip: in a rush, pattern recognition counts. Look at checks, captures and threats first.')}
               </p>
             )}
           </div>

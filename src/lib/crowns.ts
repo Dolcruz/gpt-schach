@@ -1,3 +1,4 @@
+import { L } from '../i18n';
 // Kronen: Fortschritt beim „Durchspielen“ der Bots
 import { BOTS, type Bot } from '../bots';
 import type { GameRecord } from './data';
@@ -5,9 +6,9 @@ import type { GameRecord } from './data';
 export type CrownId = 'win' | 'both' | 'clean';
 
 export const CROWNS: { id: CrownId; label: string; desc: string }[] = [
-  { id: 'win', label: 'Besiegt', desc: 'Gewinne eine Partie' },
-  { id: 'both', label: 'Beide Farben', desc: 'Gewinne mit Weiß und mit Schwarz' },
-  { id: 'clean', label: 'Ohne Hilfe', desc: 'Gewinne ohne Zurücknehmen und ohne Hinweise' },
+  { id: 'win', label: L('Besiegt', 'Defeated'), desc: L('Gewinne eine Partie', 'Win a game') },
+  { id: 'both', label: L('Beide Farben', 'Both colors'), desc: L('Gewinne mit Weiß und mit Schwarz', 'Win with White and with Black') },
+  { id: 'clean', label: L('Ohne Hilfe', 'No help'), desc: L('Gewinne ohne Zurücknehmen und ohne Hinweise', 'Win without takebacks and without hints') },
 ];
 
 /** Gewertete Siege gegen einen Bot (Übungsstellungen zählen nicht) */

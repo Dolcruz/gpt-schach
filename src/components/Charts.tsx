@@ -1,6 +1,7 @@
+import { L, locale } from '../i18n';
 import { useMemo, useRef, useState } from 'react';
 
-const fmtDate = (d: Date) => d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+const fmtDate = (d: Date) => d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
 
 interface LinePoint {
   date: string;
@@ -31,7 +32,7 @@ export function LineChart({ points, color = 'var(--series-1)', height = 180, uni
     return { x, y, lo, hi, ticks };
   }, [points, H]);
 
-  if (!geo) return <div className="chart-empty">Noch keine Daten</div>;
+  if (!geo) return <div className="chart-empty">{L('Noch keine Daten', 'No data yet')}</div>;
   const { x, y, ticks } = geo;
   const path = points.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(' ');
   const hp = hover !== null ? points[hover] : null;
@@ -82,7 +83,7 @@ export function LineChart({ points, color = 'var(--series-1)', height = 180, uni
             {hp.value}
             {unit}
           </b>
-          <span>{hp.label ?? new Date(hp.date).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+          <span>{hp.label ?? new Date(hp.date).toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
         </div>
       )}
     </div>
@@ -118,9 +119,9 @@ export function GroupedBars({ groups, series }: { groups: BarGroup[]; series: { 
                     <div className="bar" style={{ height: `${v.value ?? 0}%`, background: series[i].color, opacity: v.value === null ? 0 : 1 }} />
                     {hover === key && (
                       <div className="tooltip bar-tip">
-                        <b>{v.value === null ? 'keine Partien' : `${Math.round(v.value)}% Siege`}</b>
+                        <b>{v.value === null ? L('keine Partien', 'no games') : L(`${Math.round(v.value)}% Siege`, `${Math.round(v.value)}% wins`)}</b>
                         <span>
-                          {series[i].name} · {v.n} {v.n === 1 ? 'Partie' : 'Partien'}
+                          {series[i].name} · {v.n} {v.n === 1 ? L('Partie', 'game') : L('Partien', 'games')}
                         </span>
                       </div>
                     )}

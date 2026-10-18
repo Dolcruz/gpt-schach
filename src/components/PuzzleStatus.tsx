@@ -1,3 +1,4 @@
+import { L } from '../i18n';
 import { Check, Eye, X } from 'lucide-react';
 import { Piece } from './ui';
 import type { PuzzleStatus as Status } from '../lib/usePuzzle';
@@ -11,10 +12,10 @@ interface Props {
 }
 
 export function PuzzleStatus({ status, color, failed, delta, error }: Props) {
-  const side = color === 'w' ? 'Weiß' : 'Schwarz';
-  const ratingText = delta !== null && delta !== undefined ? `Puzzle-Rating ${delta >= 0 ? '+' : ''}${delta}` : null;
+  const side = color === 'w' ? L('Weiß', 'White') : L('Schwarz', 'Black');
+  const ratingText = delta !== null && delta !== undefined ? `${L('Puzzle-Rating', 'Puzzle rating')} ${delta >= 0 ? '+' : ''}${delta}` : null;
 
-  if (status === 'loading') return <div className="status-box">{error ? <span className="err-text">{error}</span> : 'Lade Aufgabe …'}</div>;
+  if (status === 'loading') return <div className="status-box">{error ? <span className="err-text">{error}</span> : L('Lade Aufgabe …', 'Loading puzzle …')}</div>;
   if (status === 'solved')
     return (
       <div className="status-box good">
@@ -22,8 +23,8 @@ export function PuzzleStatus({ status, color, failed, delta, error }: Props) {
           <Check size={22} strokeWidth={3} />
         </span>
         <div>
-          <b>{failed ? 'Gelöst – im zweiten Anlauf' : 'Gelöst!'}</b>
-          <span>{ratingText ?? 'Weiter so.'}</span>
+          <b>{failed ? L('Gelöst – im zweiten Anlauf', 'Solved – on the second try') : L('Gelöst!', 'Solved!')}</b>
+          <span>{ratingText ?? L('Weiter so.', 'Keep it up.')}</span>
         </div>
       </div>
     );
@@ -34,8 +35,8 @@ export function PuzzleStatus({ status, color, failed, delta, error }: Props) {
           <Eye size={20} />
         </span>
         <div>
-          <b>Lösung angezeigt</b>
-          <span>{ratingText ?? 'Schau dir die Idee in Ruhe an.'}</span>
+          <b>{L('Lösung angezeigt', 'Solution shown')}</b>
+          <span>{ratingText ?? L('Schau dir die Idee in Ruhe an.', 'Take your time to study the idea.')}</span>
         </div>
       </div>
     );
@@ -46,8 +47,8 @@ export function PuzzleStatus({ status, color, failed, delta, error }: Props) {
           <X size={22} strokeWidth={3} />
         </span>
         <div>
-          <b>Das ist nicht der Zug</b>
-          <span>Versuch es nochmal.</span>
+          <b>{L('Das ist nicht der Zug', "That's not the move")}</b>
+          <span>{L('Versuch es nochmal.', 'Try again.')}</span>
         </div>
       </div>
     );
@@ -57,8 +58,8 @@ export function PuzzleStatus({ status, color, failed, delta, error }: Props) {
         <Piece type="k" color={color} size={30} />
       </span>
       <div>
-        <b>{status === 'correct' ? 'Richtig! Weiter …' : `${side} am Zug`}</b>
-        <span>{status === 'correct' ? 'Finde den nächsten Zug.' : `Finde den besten Zug für ${side}.`}</span>
+        <b>{status === 'correct' ? L('Richtig! Weiter …', 'Correct! Keep going …') : L(`${side} am Zug`, `${side} to move`)}</b>
+        <span>{status === 'correct' ? L('Finde den nächsten Zug.', 'Find the next move.') : L(`Finde den besten Zug für ${side}.`, `Find the best move for ${side}.`)}</span>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { lang } from '../i18n';
 // Persistente Daten (liegen auf dem lokalen Server in data/store.json) + abgeleitete Statistiken.
 import type { Classification } from '../coach';
 
@@ -176,3 +177,23 @@ export function streak(dates: string[]) {
   }
   return n;
 }
+
+// Gespeicherte Spielende-Gründe in beiden Sprachen (alte Partien haben deutsche Texte)
+const REASONS: [string, string][] = [
+  ['durch Schachmatt', 'by checkmate'],
+  ['durch Patt', 'by stalemate'],
+  ['durch dreifache Wiederholung', 'by threefold repetition'],
+  ['durch ungenügendes Material', 'by insufficient material'],
+  ['durch 50-Züge-Regel', 'by the 50-move rule'],
+  ['durch Aufgabe', 'by resignation'],
+  ['durch Zeitüberschreitung', 'on time'],
+  ['Zeit abgelaufen, aber zu wenig Material zum Mattsetzen', 'Time ran out, but not enough material to mate'],
+];
+
+export function reasonLabel(r: string) {
+  for (const [de, en] of REASONS) if (r === de || r === en) return lang === 'en' ? en : de;
+  return r;
+}
+
+/** Partie auf Zeit verloren (unabhängig von der Sprache, in der sie gespeichert wurde) */
+export const isTimeLoss = (g: GameRecord) => g.result === 'loss' && (g.reason === 'durch Zeitüberschreitung' || g.reason === 'on time');

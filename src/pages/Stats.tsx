@@ -1,9 +1,10 @@
+import { L, locale } from '../i18n';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowDownRight, ArrowUpRight, Crown, Flame, Puzzle, Swords, Target, Timer, TrendingUp, Trophy, Zap } from 'lucide-react';
-import { botRatingHistory, currentRating, dayKey, isBullet, puzzleRatingHistory, store, streak, type GameRecord, type LessonProgress, type PuzzleAttempt, type RushRecord } from '../lib/data';
+import { botRatingHistory, currentRating, dayKey, isBullet, puzzleRatingHistory, store, streak, isTimeLoss, type GameRecord, type LessonProgress, type PuzzleAttempt, type RushRecord } from '../lib/data';
 import { META_THEMES, themeName } from '../lib/themes';
 import { LineChart, GroupedBars } from '../components/Charts';
-import { BOTS, type Category } from '../bots';
+import { BOTS, categoryLabel, type Category } from '../bots';
 import { crownSummary } from '../lib/crowns';
 import { navigate } from '../router';
 
@@ -72,7 +73,7 @@ export function Stats() {
     const groups = cats
       .map((c) => {
         const inCat = gs.filter((g) => categoryOf(g) === c);
-        return { label: c, values: [rate(inCat.filter((g) => g.date < recentCut)), rate(inCat.filter((g) => g.date >= recentCut))], total: inCat.length };
+        return { label: categoryLabel(c), values: [rate(inCat.filter((g) => g.date < recentCut)), rate(inCat.filter((g) => g.date >= recentCut))], total: inCat.length };
       })
       .filter((g) => g.total > 0);
 
@@ -100,7 +101,7 @@ export function Stats() {
       bulletR: currentRating(bulletHist, 800),
       bulletDelta: bulletHist.length ? currentRating(bulletHist, 800) - ratingBefore(bulletHist, 800) : null,
       bulletWins: bullet.filter((g) => g.result === 'win').length,
-      bulletFlags: bullet.filter((g) => g.result === 'loss' && g.reason.includes('Zeit')).length,
+      bulletFlags: bullet.filter(isTimeLoss).length,
       botHist,
       pzHist,
       botR,
@@ -112,7 +113,7 @@ export function Stats() {
       losses,
       accRecent,
       accDelta: accRecent !== null && accOld !== null ? Math.round((accRecent - accOld) * 10) / 10 : null,
-      accSeries: accGames.slice(-40).map((g) => ({ date: g.date, value: accOf(g), label: `gegen ${g.botName} · ${new Date(g.date).toLocaleDateString('de-DE')}` })),
+      accSeries: accGames.slice(-40).map((g) => ({ date: g.date, value: accOf(g), label: `${L('gegen', 'vs')} ${g.botName} · ${new Date(g.date).toLocaleDateString(locale)}` })),
       groups,
       strong: themes.slice(0, 4),
       weak: [...themes].reverse().slice(0, 4),
@@ -136,21 +137,21 @@ export function Stats() {
       <header className="page-head">
         <TrendingUp size={26} />
         <div>
-          <h1>Statistik</h1>
-          <p>Dein Fortschritt über die Zeit – „früher“ heißt älter als {RECENT_DAYS} Tage.</p>
+          <h1>{L('Statistik', 'Stats')}</h1>
+          <p>{L(`Dein Fortschritt über die Zeit – „früher“ heißt älter als ${RECENT_DAYS} Tage.`, `Your progress over time – "earlier" means older than ${RECENT_DAYS} days.`)}</p>
         </div>
       </header>
 
       {empty && (
         <div className="empty-card">
-          <b>Noch keine Daten</b>
-          <p>Spiel ein paar Partien oder löse Puzzles – hier siehst du dann, wie du dich entwickelst.</p>
+          <b>{L('Noch keine Daten', 'No data yet')}</b>
+          <p>{L('Spiel ein paar Partien oder löse Puzzles – hier siehst du dann, wie du dich entwickelst.', "Play a few games or solve puzzles – then you'll see how you're improving.")}</p>
           <div className="btn-row">
             <button className="btn primary" onClick={() => navigate('coach')}>
-              <Swords size={16} /> Partie spielen
+              <Swords size={16} /> {L('Partie spielen', 'Play a game')}
             </button>
             <button className="btn" onClick={() => navigate('puzzles')}>
-              <Puzzle size={16} /> Puzzles lösen
+              <Puzzle size={16} /> {L('Puzzles lösen', 'Solve puzzles')}
             </button>
           </div>
         </div>
@@ -159,89 +160,89 @@ export function Stats() {
       <div className="tiles">
         <div className="tile">
           <span className="tile-label">
-            <Swords size={15} /> Spielstärke (Bots)
+            <Swords size={15} /> {L('Spielstärke (Bots)', 'Rating (bots)')}
           </span>
           <b>{s.botR}</b>
           <Delta v={s.botDelta} />
-          <span className="tile-sub">{s.gs.length ? `aus ${s.gs.length} gewerteten Partien` : 'Start bei 800'}</span>
+          <span className="tile-sub">{s.gs.length ? L(`aus ${s.gs.length} gewerteten Partien`, `from ${s.gs.length} rated games`) : L('Start bei 800', 'Starts at 800')}</span>
         </div>
         <div className="tile">
           <span className="tile-label">
-            <Puzzle size={15} /> Puzzle-Rating
+            <Puzzle size={15} /> {L('Puzzle-Rating', 'Puzzle rating')}
           </span>
           <b>{s.pzR}</b>
           <Delta v={s.pzDelta} />
-          <span className="tile-sub">{s.solved} gelöst · heute {s.puzzlesToday}</span>
+          <span className="tile-sub">{L(`${s.solved} gelöst · heute ${s.puzzlesToday}`, `${s.solved} solved · today ${s.puzzlesToday}`)}</span>
         </div>
         <div className="tile">
           <span className="tile-label">
-            <Trophy size={15} /> Bilanz
+            <Trophy size={15} /> {L('Bilanz', 'Record')}
           </span>
           <b className="wdl">
             <span className="w">{s.wins}</span>/<span>{s.draws}</span>/<span className="l">{s.losses}</span>
           </b>
-          <span className="tile-sub">Siege / Remis / Niederlagen</span>
+          <span className="tile-sub">{L('Siege / Remis / Niederlagen', 'Wins / draws / losses')}</span>
         </div>
         <div className="tile">
           <span className="tile-label">
-            <Target size={15} /> Genauigkeit
+            <Target size={15} /> {L('Genauigkeit', 'Accuracy')}
           </span>
           <b>{s.accRecent !== null ? `${s.accRecent}%` : '–'}</b>
           <Delta v={s.accDelta} suffix=" %" />
-          <span className="tile-sub">{s.blundersRecent !== null ? `Ø ${s.blundersRecent} Patzer/Partie (letzte 10)` : 'Ø der letzten 10 Partien'}</span>
+          <span className="tile-sub">{s.blundersRecent !== null ? L(`Ø ${s.blundersRecent} Patzer/Partie (letzte 10)`, `Ø ${s.blundersRecent} blunders/game (last 10)`) : L('Ø der letzten 10 Partien', 'Ø of the last 10 games')}</span>
         </div>
         <div className="tile">
           <span className="tile-label">
-            <Crown size={15} /> Kronen
+            <Crown size={15} /> {L('Kronen', 'Crowns')}
           </span>
           <b>
             {crowns.earned}
             <small className="of">/{crowns.total}</small>
           </b>
           <span className="tile-sub">
-            {crowns.beaten} von {BOTS.length} Bots besiegt{crowns.next ? ` · nächstes Ziel: ${crowns.next.name}` : ''}
+            {L(`${crowns.beaten} von ${BOTS.length} Bots besiegt`, `${crowns.beaten} of ${BOTS.length} bots defeated`)}{crowns.next ? L(` · nächstes Ziel: ${crowns.next.name}`, ` · next target: ${crowns.next.name}`) : ''}
           </span>
         </div>
         <div className="tile">
           <span className="tile-label">
-            <Flame size={15} /> Serie
+            <Flame size={15} /> {L('Serie', 'Streak')}
           </span>
           <b>{s.streak}</b>
           <span className="tile-sub">
-            {s.streak === 1 ? 'Tag' : 'Tage'} in Folge aktiv · {s.lessonsDone} Lektionen fertig
+            {s.streak === 1 ? L('Tag', 'day') : L('Tage', 'days')} {L('in Folge aktiv', 'active in a row')} · {L(`${s.lessonsDone} Lektionen fertig`, `${s.lessonsDone} lessons done`)}
           </span>
         </div>
       </div>
 
       <div className="chart-grid">
         <section className="chart-card">
-          <h2>Spielstärke gegen Bots</h2>
-          <p className="chart-sub">Elo-Schätzung aus deinen Ergebnissen gegen die Bot-Ratings</p>
+          <h2>{L('Spielstärke gegen Bots', 'Rating vs bots')}</h2>
+          <p className="chart-sub">{L('Elo-Schätzung aus deinen Ergebnissen gegen die Bot-Ratings', 'Elo estimate from your results against the bot ratings')}</p>
           <LineChart points={s.botHist.map((p) => ({ date: p.date, value: p.rating }))} color="var(--series-1)" />
         </section>
         <section className="chart-card">
-          <h2>Puzzle-Rating</h2>
-          <p className="chart-sub">Nur der erste Versuch je Aufgabe zählt; Hinweise = nicht gelöst</p>
+          <h2>{L('Puzzle-Rating', 'Puzzle rating')}</h2>
+          <p className="chart-sub">{L('Nur der erste Versuch je Aufgabe zählt; Hinweise = nicht gelöst', 'Only the first attempt per puzzle counts; hints = not solved')}</p>
           <LineChart points={s.pzHist.map((p) => ({ date: p.date, value: p.rating }))} color="var(--series-1)" />
         </section>
         <section className="chart-card">
-          <h2>Siegquote nach Gegnerstärke</h2>
-          <p className="chart-sub">Remis zählen halb</p>
+          <h2>{L('Siegquote nach Gegnerstärke', 'Win rate by opponent strength')}</h2>
+          <p className="chart-sub">{L('Remis zählen halb', 'Draws count as half')}</p>
           {s.groups.length ? (
             <GroupedBars
               groups={s.groups}
               series={[
-                { name: `Früher`, color: 'var(--series-2)' },
-                { name: `Letzte ${RECENT_DAYS} Tage`, color: 'var(--series-1)' },
+                { name: L('Früher', 'Earlier'), color: 'var(--series-2)' },
+                { name: L(`Letzte ${RECENT_DAYS} Tage`, `Last ${RECENT_DAYS} days`), color: 'var(--series-1)' },
               ]}
             />
           ) : (
-            <div className="chart-empty">Noch keine Partien</div>
+            <div className="chart-empty">{L('Noch keine Partien', 'No games yet')}</div>
           )}
         </section>
         <section className="chart-card">
-          <h2>Genauigkeit pro Partie</h2>
-          <p className="chart-sub">Aus Coach-Partien und analysierten Partien</p>
+          <h2>{L('Genauigkeit pro Partie', 'Accuracy per game')}</h2>
+          <p className="chart-sub">{L('Aus Coach-Partien und analysierten Partien', 'From coach games and analyzed games')}</p>
           <LineChart points={s.accSeries} color="var(--series-1)" unit=" %" />
         </section>
       </div>
@@ -254,34 +255,34 @@ export function Stats() {
           <div className="tiles">
             <div className="tile">
               <span className="tile-label">
-                <Timer size={15} /> Bullet-Wertung
+                <Timer size={15} /> {L('Bullet-Wertung', 'Bullet rating')}
               </span>
               <b>{s.bullet.length ? s.bulletR : '–'}</b>
               <Delta v={s.bulletDelta} />
               <span className="tile-sub">
-                {s.bulletWins} Siege aus {s.bullet.length} · {s.bulletFlags}× auf Zeit verloren
+                {L(`${s.bulletWins} Siege aus ${s.bullet.length} · ${s.bulletFlags}× auf Zeit verloren`, `${s.bulletWins} wins of ${s.bullet.length} · ${s.bulletFlags}× lost on time`)}
               </span>
             </div>
             {[60, 180, 300].map((m) => (
               <div className="tile" key={m}>
                 <span className="tile-label">
-                  <Zap size={15} /> Puzzle Rush {m / 60} Min
+                  <Zap size={15} /> Puzzle Rush {m / 60} min
                 </span>
                 <b>{rushBest(m) || '–'}</b>
-                <span className="tile-sub">Rekord · {rush.filter((r) => r.mode === m).length} Läufe</span>
+                <span className="tile-sub">{L('Rekord', 'Best')} · {rush.filter((r) => r.mode === m).length} {L('Läufe', 'runs')}</span>
               </div>
             ))}
           </div>
           <div className="chart-grid">
             <section className="chart-card">
-              <h2>Bullet-Wertung</h2>
-              <p className="chart-sub">Partien mit Uhr bis 3 Minuten, getrennt von deiner normalen Wertung</p>
+              <h2>{L('Bullet-Wertung', 'Bullet rating')}</h2>
+              <p className="chart-sub">{L('Partien mit Uhr bis 3 Minuten, getrennt von deiner normalen Wertung', 'Games with a clock up to 3 minutes, separate from your regular rating')}</p>
               <LineChart points={s.bulletHist.map((p) => ({ date: p.date, value: p.rating }))} color="var(--series-1)" />
             </section>
             <section className="chart-card">
-              <h2>Puzzle Rush (3 Minuten)</h2>
-              <p className="chart-sub">Gelöste Aufgaben pro Lauf</p>
-              <LineChart points={rush3.map((r) => ({ date: r.date, value: r.score, label: `${r.score} gelöst · bis Rating ${r.maxRating || '–'}` }))} color="var(--series-1)" />
+              <h2>{L('Puzzle Rush (3 Minuten)', 'Puzzle Rush (3 minutes)')}</h2>
+              <p className="chart-sub">{L('Gelöste Aufgaben pro Lauf', 'Puzzles solved per run')}</p>
+              <LineChart points={rush3.map((r) => ({ date: r.date, value: r.score, label: L(`${r.score} gelöst · bis Rating ${r.maxRating || '–'}`, `${r.score} solved · up to rating ${r.maxRating || '–'}`) }))} color="var(--series-1)" />
             </section>
           </div>
         </>
@@ -290,13 +291,13 @@ export function Stats() {
       {(s.strong.length > 0 || s.weak.length > 0) && (
         <div className="chart-grid">
           <section className="chart-card">
-            <h2>Deine Stärken</h2>
-            <p className="chart-sub">Taktikmotive mit der höchsten Lösungsquote</p>
+            <h2>{L('Deine Stärken', 'Your strengths')}</h2>
+            <p className="chart-sub">{L('Taktikmotive mit der höchsten Lösungsquote', 'Tactical motifs with the highest solve rate')}</p>
             <ThemeList items={s.strong} />
           </section>
           <section className="chart-card">
-            <h2>Hier lohnt sich Training</h2>
-            <p className="chart-sub">Taktikmotive mit der niedrigsten Lösungsquote</p>
+            <h2>{L('Hier lohnt sich Training', 'Worth training')}</h2>
+            <p className="chart-sub">{L('Taktikmotive mit der niedrigsten Lösungsquote', 'Tactical motifs with the lowest solve rate')}</p>
             <ThemeList items={s.weak} />
           </section>
         </div>

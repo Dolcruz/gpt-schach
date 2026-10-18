@@ -1,3 +1,4 @@
+import { L } from '../i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Chess, type Move } from 'chess.js';
 import type { Key } from 'chessground/types';
@@ -12,7 +13,7 @@ import { CLASS_INFO, positionBlock, pvToSan, type Classification } from '../coac
 import { store, type GameAnalysis, type GameRecord } from '../lib/data';
 import { analyzeGame, CLASS_ORDER, whiteCp } from '../lib/review';
 import { TimeBars } from '../components/TimeBars';
-import { tcLabel } from '../lib/data';
+import { reasonLabel, tcLabel } from '../lib/data';
 import { playSound } from '../sound';
 import { navigate } from '../router';
 import type { PageProps } from '../App';
@@ -246,7 +247,7 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
       }
       setLoadText('');
     } catch {
-      setLoadErr('Das ist weder eine gültige FEN noch eine gültige PGN.');
+      setLoadErr(L('Das ist weder eine gültige FEN noch eine gültige PGN.', 'That is neither a valid FEN nor a valid PGN.'));
     }
   }
 
@@ -289,23 +290,38 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
 
   const context = () => {
     const sign = fen.split(' ')[1] === 'w' ? 1 : -1;
+    const W = L('Weiß', 'White');
+    const B = L('Schwarz', 'Black');
+    const student = L('Schüler', 'Student');
     return positionBlock(fen, [
-      game ? `Partie: ${game.color === 'w' ? 'Schüler (Weiß)' : game.botName + ' (Weiß)'} gegen ${game.color === 'w' ? game.botName : 'Schüler'} – Ergebnis aus Sicht des Schülers: ${game.result} (${game.reason}). Der Schüler spielte ${game.color === 'w' ? 'Weiß' : 'Schwarz'}.` : 'Freie Analyse.',
-      `Züge bis hier: ${line.slice(0, cursor).map((m, i) => (i % 2 === 0 ? `${i / 2 + 1}.${m}` : m)).join(' ') || '(Ausgangsstellung)'}`,
-      lines.length ? `Stockfish (Tiefe ${lines[0].depth}, Sicht Weiß):\n${lines.map((l) => `${formatScore(l.score * sign, l.mate !== null ? l.mate * sign : null)}: ${pvToSan(fen, l.pv, 6).join(' ')}`).join('\n')}` : '',
-      last && lastClass ? `Letzter Zug ${last.san}: ${CLASS_INFO[lastClass.c].label} (Verlust ≈ ${lastClass.loss.toFixed(1)} Prozentpunkte Gewinnchance)` : '',
+      game
+        ? L(
+            `Partie: ${game.color === 'w' ? `${student} (${W})` : `${game.botName} (${W})`} gegen ${game.color === 'w' ? game.botName : student} – Ergebnis aus Sicht des Schülers: ${game.result} (${reasonLabel(game.reason)}). Der Schüler spielte ${game.color === 'w' ? W : B}.`,
+            `Game: ${game.color === 'w' ? `${student} (${W})` : `${game.botName} (${W})`} vs ${game.color === 'w' ? game.botName : student} – result from the student's view: ${game.result} (${reasonLabel(game.reason)}). The student played ${game.color === 'w' ? W : B}.`,
+          )
+        : L('Freie Analyse.', 'Free analysis.'),
+      `${L('Züge bis hier', 'Moves so far')}: ${line.slice(0, cursor).map((m, i) => (i % 2 === 0 ? `${i / 2 + 1}.${m}` : m)).join(' ') || L('(Ausgangsstellung)', '(starting position)')}`,
+      lines.length
+        ? `${L(`Stockfish (Tiefe ${lines[0].depth}, Sicht Weiß)`, `Stockfish (depth ${lines[0].depth}, White's view)`)}:\n${lines.map((l) => `${formatScore(l.score * sign, l.mate !== null ? l.mate * sign : null)}: ${pvToSan(fen, l.pv, 6).join(' ')}`).join('\n')}`
+        : '',
+      last && lastClass
+        ? L(
+            `Letzter Zug ${last.san}: ${CLASS_INFO[lastClass.c].label} (Verlust ≈ ${lastClass.loss.toFixed(1)} Prozentpunkte Gewinnchance)`,
+            `Last move ${last.san}: ${CLASS_INFO[lastClass.c].label} (loss ≈ ${lastClass.loss.toFixed(1)} percentage points of winning chance)`,
+          )
+        : '',
       analysis && game
-        ? `Genauigkeit: Weiß ${analysis.accuracy.w}%, Schwarz ${analysis.accuracy.b}%. Fehler/Patzer des Schülers: ${analysis.plies
+        ? `${L('Genauigkeit', 'Accuracy')}: ${W} ${analysis.accuracy.w}%, ${B} ${analysis.accuracy.b}%. ${L('Fehler/Patzer des Schülers', "Student's mistakes/blunders")}: ${analysis.plies
             .map((p, i) => ({ p, i }))
             .filter(({ p, i }) => (i % 2 === 0) === (game.color === 'w') && (p.c === 'mistake' || p.c === 'blunder'))
-            .map(({ p, i }) => `${Math.floor(i / 2) + 1}${i % 2 ? '...' : '.'}${game.sans[i]} (${CLASS_INFO[p.c].label}, besser ${p.bestSan})`)
-            .join(', ') || 'keine'}`
+            .map(({ p, i }) => `${Math.floor(i / 2) + 1}${i % 2 ? '...' : '.'}${game.sans[i]} (${CLASS_INFO[p.c].label}, ${L('besser', 'better')} ${p.bestSan})`)
+            .join(', ') || L('keine', 'none')}`
         : '',
       game?.times && game.timeControl
-        ? `Zeitkontrolle ${tcLabel(game.timeControl)} (Bullet). Bedenkzeit und Restzeit des Schülers je Zug: ${game.times
+        ? `${L(`Zeitkontrolle ${tcLabel(game.timeControl)} (Bullet). Bedenkzeit und Restzeit des Schülers je Zug`, `Time control ${tcLabel(game.timeControl)} (bullet). Student's thinking time and remaining time per move`)}: ${game.times
             .map((t, i) => ({ t, i }))
             .filter(({ i }) => (i % 2 === 0) === (game.color === 'w'))
-            .map(({ t, i }) => `${Math.floor(i / 2) + 1}.${game.sans[i]} ${(t / 1000).toFixed(1)}s (Rest ${((game.clocks?.[i] ?? 0) / 1000).toFixed(0)}s${analysis?.plies[i] && ['mistake', 'blunder'].includes(analysis.plies[i].c) ? `, ${CLASS_INFO[analysis.plies[i].c].label}` : ''})`)
+            .map(({ t, i }) => `${Math.floor(i / 2) + 1}.${game.sans[i]} ${(t / 1000).toFixed(1)}s (${L('Rest', 'left')} ${((game.clocks?.[i] ?? 0) / 1000).toFixed(0)}s${analysis?.plies[i] && ['mistake', 'blunder'].includes(analysis.plies[i].c) ? `, ${CLASS_INFO[analysis.plies[i].c].label}` : ''})`)
             .join(', ')}`
         : '',
     ]);
@@ -320,8 +336,8 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
     return r;
   };
 
-  const whiteName = game ? (game.color === 'w' ? 'Du' : game.botName) : 'Weiß';
-  const blackName = game ? (game.color === 'b' ? 'Du' : game.botName) : 'Schwarz';
+  const whiteName = game ? (game.color === 'w' ? L('Du', 'You') : game.botName) : L('Weiß', 'White');
+  const blackName = game ? (game.color === 'b' ? L('Du', 'You') : game.botName) : L('Schwarz', 'Black');
   const topSide = orientation === 'white' ? 'b' : 'w';
   const bar = (side: 'w' | 'b') => {
     const isYou = game && game.color === side;
@@ -366,16 +382,16 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
       <section className="panel">
         <header className="panel-head">
           <Microscope size={21} />
-          <h1>{game ? 'Partie-Analyse' : 'Analyse'}</h1>
+          <h1>{game ? L('Partie-Analyse', 'Game review') : L('Analyse', 'Analysis')}</h1>
         </header>
 
         <div className="engine-box">
           <div className="engine-head">
-            <button className={`switch-btn ${engineOn ? 'on' : ''}`} onClick={() => setEngineOn(!engineOn)} title="Engine an/aus">
+            <button className={`switch-btn ${engineOn ? 'on' : ''}`} onClick={() => setEngineOn(!engineOn)} title={L('Engine an/aus', 'Engine on/off')}>
               <Cpu size={15} />
             </button>
-            <span className="engine-eval">{engineOn ? (top ? (top.mate !== null ? `#${top.mate}` : `${top.cp > 0 ? '+' : ''}${(top.cp / 100).toFixed(2)}`) : '…') : 'Engine aus'}</span>
-            <span className="engine-depth">{engineOn && lines[0] ? `Tiefe ${lines[0].depth}` : ''}</span>
+            <span className="engine-eval">{engineOn ? (top ? (top.mate !== null ? `#${top.mate}` : `${top.cp > 0 ? '+' : ''}${(top.cp / 100).toFixed(2)}`) : '…') : L('Engine aus', 'Engine off')}</span>
+            <span className="engine-depth">{engineOn && lines[0] ? `${L('Tiefe', 'Depth')} ${lines[0].depth}` : ''}</span>
           </div>
           {engineOn &&
             lines.map((l, i) => {
@@ -383,10 +399,10 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
               const sc = l.mate !== null ? `#${l.mate * sign}` : `${l.score * sign > 0 ? '+' : ''}${((l.score * sign) / 100).toFixed(2)}`;
               return (
                 <div key={i} className="engine-line">
-                  <button className={`pill ${l.score * sign >= 0 ? 'w' : 'b'}`} onClick={() => onMove(l.pv[0].slice(0, 2), l.pv[0].slice(2, 4))} title="Ersten Zug spielen">
+                  <button className={`pill ${l.score * sign >= 0 ? 'w' : 'b'}`} onClick={() => onMove(l.pv[0].slice(0, 2), l.pv[0].slice(2, 4))} title={L('Ersten Zug spielen', 'Play the first move')}>
                     {sc}
                   </button>
-                  <button className="pv" onClick={() => vv.open({ startFen: fen, sans: pvToSan(fen, l.pv, 12), title: `Engine-Variante ${i + 1}` }, 1)} title="Variante Zug für Zug ansehen">
+                  <button className="pv" onClick={() => vv.open({ startFen: fen, sans: pvToSan(fen, l.pv, 12), title: `${L('Engine-Variante', 'Engine line')} ${i + 1}` }, 1)} title={L('Variante Zug für Zug ansehen', 'Step through the line move by move')}>
                     {pvToSan(fen, l.pv, 8).join(' ')}
                   </button>
                 </div>
@@ -396,7 +412,7 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
             <div className="last-move">
               {lastClass ? <ClassIcon c={lastClass.c} size={18} /> : <span className="dot-wait" />}
               <span>
-                <b>{last.san}</b> {lastClass ? <span style={{ color: CLASS_INFO[lastClass.c].color }}>{CLASS_INFO[lastClass.c].label}</span> : <span className="muted-text">wird bewertet …</span>}
+                <b>{last.san}</b> {lastClass ? <span style={{ color: CLASS_INFO[lastClass.c].color }}>{CLASS_INFO[lastClass.c].label}</span> : <span className="muted-text">{L('wird bewertet …', 'evaluating …')}</span>}
               </span>
               {lastClass?.before && lastClass.after && (
                 <span className="eval-change">
@@ -409,7 +425,7 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
 
         <div className="seg-tabs flat">
           <button className={tab === 'moves' ? 'on' : ''} onClick={() => setTab('moves')}>
-            <ListOrdered size={15} /> Züge
+            <ListOrdered size={15} /> {L('Züge', 'Moves')}
           </button>
           <button className={tab === 'coach' ? 'on' : ''} onClick={() => setTab('coach')}>
             <GraduationCap size={15} /> Coach
@@ -420,7 +436,7 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
           <div className="panel-body tight">
             {game && progress !== null && (
               <div className="review-progress">
-                <span>Partie wird analysiert … {Math.round(progress * 100)} %</span>
+                <span>{L('Partie wird analysiert …', 'Analyzing game …')} {Math.round(progress * 100)} %</span>
                 <div className="progress">
                   <i style={{ width: `${progress * 100}%` }} />
                 </div>
@@ -443,7 +459,7 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
                   <tbody>
                     <tr className="acc-row">
                       <td>{analysis.accuracy.w}</td>
-                      <td>Genauigkeit</td>
+                      <td>{L('Genauigkeit', 'Accuracy')}</td>
                       <td>{analysis.accuracy.b}</td>
                     </tr>
                     {CLASS_ORDER.map((c) => {
@@ -482,7 +498,7 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
             )}
             {deviated && (
               <div className="variation-banner">
-                <span>Du schaust dir eine eigene Variante an.</span>
+                <span>{L('Du schaust dir eine eigene Variante an.', "You're looking at your own variation.")}</span>
                 <button
                   className="btn small"
                   onClick={() => {
@@ -490,12 +506,12 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
                     setCursor(Math.min(cursor, mainline.length));
                   }}
                 >
-                  <Undo2 size={14} /> Zur Partie
+                  <Undo2 size={14} /> {L('Zur Partie', 'Back to game')}
                 </button>
               </div>
             )}
             <div className="moves analysis-moves">
-              {pairs.length === 0 && <div className="moves-empty">Zieh einfach Figuren – beide Seiten sind frei beweglich.</div>}
+              {pairs.length === 0 && <div className="moves-empty">{L('Zieh einfach Figuren – beide Seiten sind frei beweglich.', 'Just move pieces – both sides can move freely.')}</div>}
               {pairs.map((p) => (
                 <div className="move-row" key={p.n}>
                   <span className="num">{p.n}.</span>
@@ -514,11 +530,11 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
             </div>
             {!game && (
               <div className="load-box">
-                <textarea value={loadText} onChange={(e) => setLoadText(e.target.value)} placeholder="FEN oder PGN einfügen …" rows={2} />
+                <textarea value={loadText} onChange={(e) => setLoadText(e.target.value)} placeholder={L('FEN oder PGN einfügen …', 'Paste FEN or PGN …')} rows={2} />
                 {loadErr && <span className="err-text">{loadErr}</span>}
                 <div className="btn-row">
                   <button className="btn small" onClick={load} disabled={!loadText.trim()}>
-                    <FileInput size={14} /> Laden
+                    <FileInput size={14} /> {L('Laden', 'Load')}
                   </button>
                   <button
                     className="btn small ghost"
@@ -529,7 +545,7 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
                       setCursor(0);
                     }}
                   >
-                    <RotateCcw size={14} /> Grundstellung
+                    <RotateCcw size={14} /> {L('Grundstellung', 'Start position')}
                   </button>
                 </div>
               </div>
@@ -543,36 +559,36 @@ export function Analysis({ gameId, loggedIn, settings }: PageProps & { gameId?: 
             settings={settings}
             context={context}
             onArrows={setArrows}
-            intro={game ? 'Klick dich durch die Partie – ich erkläre dir jeden Moment. Frag z. B. „Warum war das ein Fehler?“' : 'Zieh beliebige Züge für beide Seiten – ich erkläre dir, was in der Stellung los ist.'}
+            intro={game ? L('Klick dich durch die Partie – ich erkläre dir jeden Moment. Frag z. B. „Warum war das ein Fehler?“', 'Click through the game – I\'ll explain every moment. Ask e.g. "Why was that a mistake?"') : L('Zieh beliebige Züge für beide Seiten – ich erkläre dir, was in der Stellung los ist.', 'Play any moves for both sides – I\'ll explain what\'s going on in the position.')}
             quick={[
-              { label: 'Was ist der Plan?', prompt: 'Was sind in dieser Stellung die Pläne für beide Seiten? Was würdest du als Nächstes spielen und warum?' },
-              { label: 'Bewerte den letzten Zug', prompt: 'Bewerte den zuletzt gespielten Zug: Was war die Idee, und gab es etwas Besseres? Zeichne ggf. den besseren Zug als Pfeil.' },
+              { label: L('Was ist der Plan?', "What's the plan?"), prompt: L('Was sind in dieser Stellung die Pläne für beide Seiten? Was würdest du als Nächstes spielen und warum?', 'What are the plans for both sides in this position? What would you play next and why?') },
+              { label: L('Bewerte den letzten Zug', 'Rate the last move'), prompt: L('Bewerte den zuletzt gespielten Zug: Was war die Idee, und gab es etwas Besseres? Zeichne ggf. den besseren Zug als Pfeil.', 'Rate the last move played: what was the idea, and was there something better? Draw the better move as an arrow if needed.') },
               ...(game?.timeControl
-                ? [{ label: 'Bullet-Besprechung', prompt: 'Gib mir eine Bullet-Besprechung: Wo habe ich zu viel Zeit verbraucht, welche Fehler passierten unter Zeitdruck (wenig Restzeit), wo hätte ich schneller/einfacher spielen oder premoven können? Gib 3 konkrete Bullet-Tipps für meine nächste Partie. Max. 200 Wörter.' }]
+                ? [{ label: L('Bullet-Besprechung', 'Bullet review'), prompt: L('Gib mir eine Bullet-Besprechung: Wo habe ich zu viel Zeit verbraucht, welche Fehler passierten unter Zeitdruck (wenig Restzeit), wo hätte ich schneller/einfacher spielen oder premoven können? Gib 3 konkrete Bullet-Tipps für meine nächste Partie. Max. 200 Wörter.', 'Give me a bullet review: where did I use too much time, which mistakes happened under time pressure (little time left), where could I have played faster/simpler or premoved? Give 3 concrete bullet tips for my next game. Max. 200 words.') }]
                 : []),
-              ...(game ? [{ label: 'Partie besprechen', prompt: 'Gib mir eine Partie-Besprechung wie das Game Review auf chess.com: 1) Was lief gut, 2) die 2–3 Schlüsselmomente mit Zugnummer, 3) ein konkreter Trainingstipp. Max. 200 Wörter.' }] : []),
+              ...(game ? [{ label: L('Partie besprechen', 'Review game'), prompt: L('Gib mir eine Partie-Besprechung wie das Game Review auf chess.com: 1) Was lief gut, 2) die 2–3 Schlüsselmomente mit Zugnummer, 3) ein konkreter Trainingstipp. Max. 200 Wörter.', 'Give me a game review like on the big chess sites: 1) what went well, 2) the 2–3 key moments with move numbers, 3) one concrete training tip. Max. 200 words.') }] : []),
             ]}
           />
         )}
 
         <div className="nav-bar">
-          <button className="ctrl" onClick={() => setCursor(0)} disabled={cursor === 0} title="Anfang">
+          <button className="ctrl" onClick={() => setCursor(0)} disabled={cursor === 0} title={L('Anfang', 'Start')}>
             <ChevronFirst size={20} />
           </button>
-          <button className="ctrl" onClick={() => setCursor(cursor - 1)} disabled={cursor === 0} title="Zurück (←)">
+          <button className="ctrl" onClick={() => setCursor(cursor - 1)} disabled={cursor === 0} title={L('Zurück (←)', 'Back (←)')}>
             <ChevronLeft size={20} />
           </button>
-          <button className="ctrl" onClick={() => setCursor(cursor + 1)} disabled={cursor >= line.length} title="Vor (→)">
+          <button className="ctrl" onClick={() => setCursor(cursor + 1)} disabled={cursor >= line.length} title={L('Vor (→)', 'Forward (→)')}>
             <ChevronRight size={20} />
           </button>
-          <button className="ctrl" onClick={() => setCursor(line.length)} disabled={cursor >= line.length} title="Ende">
+          <button className="ctrl" onClick={() => setCursor(line.length)} disabled={cursor >= line.length} title={L('Ende', 'End')}>
             <ChevronLast size={20} />
           </button>
-          <button className="ctrl" onClick={() => setOrientation((o) => (o === 'white' ? 'black' : 'white'))} title="Brett drehen">
+          <button className="ctrl" onClick={() => setOrientation((o) => (o === 'white' ? 'black' : 'white'))} title={L('Brett drehen', 'Flip board')}>
             <ArrowUpDown size={18} />
           </button>
           {game && (
-            <button className="ctrl" onClick={() => navigate('games')} title="Alle Partien">
+            <button className="ctrl" onClick={() => navigate('games')} title={L('Alle Partien', 'All games')}>
               <ListOrdered size={18} />
             </button>
           )}

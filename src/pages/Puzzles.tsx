@@ -1,3 +1,4 @@
+import { L, locale } from '../i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarDays, Check, ChevronDown, Eye, Lightbulb, Microscope, Puzzle as PuzzleIcon, RotateCcw, X } from 'lucide-react';
 import { Board } from '../components/Board';
@@ -21,7 +22,7 @@ async function fetchPuzzle(daily: boolean, angle: string, difficulty: string): P
   q.set('difficulty', difficulty);
   const r = await fetch(daily ? '/api/puzzle/daily' : `/api/puzzle/next?${q}`);
   const j = await r.json();
-  if (!r.ok) throw new Error(j.error ?? 'Puzzle konnte nicht geladen werden');
+  if (!r.ok) throw new Error(j.error ?? L('Puzzle konnte nicht geladen werden', 'Could not load puzzle'));
   return j;
 }
 
@@ -99,7 +100,7 @@ export function Puzzles({ daily, loggedIn, settings }: PageProps & { daily: bool
 
   const pz = usePuzzle(puzzle, onOutcome);
   const finished = pz.status === 'solved' || pz.status === 'shown';
-  const sideName = puzzle?.color === 'w' ? 'Weiß' : 'Schwarz';
+  const sideName = puzzle?.color === 'w' ? L('Weiß', 'White') : L('Schwarz', 'Black');
   const themes = (puzzle?.themes ?? []).filter((t) => !META_THEMES.has(t));
 
   const shapes = arrows.length
@@ -109,11 +110,13 @@ export function Puzzles({ daily, loggedIn, settings }: PageProps & { daily: bool
   const context = useCallback(() => {
     if (!puzzle) return '';
     return positionBlock(pz.fen, [
-      `Taktikaufgabe (Rating ${puzzle.rating}). Ausgangsstellung: ${puzzle.fen}`,
-      `Der Schüler spielt ${sideName}.`,
-      `Korrekte Lösung (geprüft): ${pz.solutionSan().join(' ')}`,
-      `Motive: ${themes.map(themeName).join(', ') || 'unbekannt'}`,
-      finished ? 'Die Aufgabe ist beendet – du darfst die Lösung erklären.' : 'Die Aufgabe läuft noch – verrate die Lösung NICHT, gib höchstens Hinweise.',
+      L(`Taktikaufgabe (Rating ${puzzle.rating}). Ausgangsstellung: ${puzzle.fen}`, `Tactics puzzle (rating ${puzzle.rating}). Starting position: ${puzzle.fen}`),
+      L(`Der Schüler spielt ${sideName}.`, `The student plays ${sideName}.`),
+      L(`Korrekte Lösung (geprüft): ${pz.solutionSan().join(' ')}`, `Correct solution (verified): ${pz.solutionSan().join(' ')}`),
+      L(`Motive: ${themes.map(themeName).join(', ') || 'unbekannt'}`, `Motifs: ${themes.map(themeName).join(', ') || 'unknown'}`),
+      finished
+        ? L('Die Aufgabe ist beendet – du darfst die Lösung erklären.', 'The puzzle is finished – you may explain the solution.')
+        : L('Die Aufgabe läuft noch – verrate die Lösung NICHT, gib höchstens Hinweise.', 'The puzzle is still running – do NOT reveal the solution, give hints at most.'),
     ]);
   }, [puzzle, pz, sideName, themes, finished]);
 
@@ -127,14 +130,14 @@ export function Puzzles({ daily, loggedIn, settings }: PageProps & { daily: bool
           <span className="bar-icon">{daily ? <CalendarDays size={22} /> : <PuzzleIcon size={22} />}</span>
           <div className="player-info">
             <div className="player-name">
-              <b>{daily ? `Tagesrätsel · ${new Date().toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}` : 'Taktikaufgabe'}</b>
+              <b>{daily ? `${L('Tagesrätsel', 'Daily puzzle')} · ${new Date().toLocaleDateString(locale, { day: 'numeric', month: 'long' })}` : L('Taktikaufgabe', 'Tactics puzzle')}</b>
               {finished && puzzle && <span className="rating">({puzzle.rating})</span>}
             </div>
             <div className="bar-sub">
               {finished ? (
                 <span className="theme-list">{themes.map(themeName).join(' · ')}</span>
               ) : (
-                puzzle && <span className="muted-text">Zug {pz.moveNumber} von {pz.totalMoves}</span>
+                puzzle && <span className="muted-text">{L(`Zug ${pz.moveNumber} von ${pz.totalMoves}`, `Move ${pz.moveNumber} of ${pz.totalMoves}`)}</span>
               )}
             </div>
           </div>
@@ -157,7 +160,7 @@ export function Puzzles({ daily, loggedIn, settings }: PageProps & { daily: bool
           <Avatar id="you" size={40} />
           <div className="player-info">
             <div className="player-name">
-              <b>Du</b>
+              <b>{L('Du', 'You')}</b>
               <span className="rating">({rating})</span>
             </div>
             <div className="bar-sub session-dots">
@@ -174,30 +177,30 @@ export function Puzzles({ daily, loggedIn, settings }: PageProps & { daily: bool
       <section className="panel">
         <header className="panel-head">
           {daily ? <CalendarDays size={21} /> : <PuzzleIcon size={21} />}
-          <h1>{daily ? 'Tagesrätsel' : 'Puzzles'}</h1>
+          <h1>{daily ? L('Tagesrätsel', 'Daily puzzle') : 'Puzzles'}</h1>
         </header>
         <div className="panel-top">
           {statusBox}
           <div className="stat-row">
             <div>
-              <span>Puzzle-Rating</span>
+              <span>{L('Puzzle-Rating', 'Puzzle rating')}</span>
               <b>{rating}</b>
             </div>
             <div>
-              <span>{daily ? 'Serie' : 'Gelöst'}</span>
-              <b>{daily ? `${dailyStreak} ${dailyStreak === 1 ? 'Tag' : 'Tage'}` : (attempts ?? []).filter((a) => a.solved && !a.assisted).length}</b>
+              <span>{daily ? L('Serie', 'Streak') : L('Gelöst', 'Solved')}</span>
+              <b>{daily ? `${dailyStreak} ${dailyStreak === 1 ? L('Tag', 'day') : L('Tage', 'days')}` : (attempts ?? []).filter((a) => a.solved && !a.assisted).length}</b>
             </div>
             <div>
-              <span>Heute</span>
+              <span>{L('Heute', 'Today')}</span>
               <b>{(attempts ?? []).filter((a) => dayKey(a.date) === today).length}</b>
             </div>
           </div>
           {daily && dailyDone && pz.status === 'play' && puzzle?.id === dailyDone.id && (
-            <p className="hint-text">Du hast das heutige Rätsel schon {dailyDone.solved && !dailyDone.assisted ? 'gelöst' : 'gespielt'} – du kannst es nochmal ungewertet lösen.</p>
+            <p className="hint-text">{dailyDone.solved && !dailyDone.assisted ? L('Du hast das heutige Rätsel schon gelöst – du kannst es nochmal ungewertet lösen.', "You've already solved today's puzzle – you can solve it again unrated.") : L('Du hast das heutige Rätsel schon gespielt – du kannst es nochmal ungewertet lösen.', "You've already played today's puzzle – you can solve it again unrated.")}</p>
           )}
           {!daily && (
             <label className="select inline">
-              <span>Thema</span>
+              <span>{L('Thema', 'Theme')}</span>
               <div className="select-box">
                 <select
                   value={angle}
@@ -222,24 +225,24 @@ export function Puzzles({ daily, loggedIn, settings }: PageProps & { daily: bool
             {!finished ? (
               <>
                 <button className="btn" onClick={pz.hint} disabled={!puzzle}>
-                  <Lightbulb size={16} /> Hinweis
+                  <Lightbulb size={16} /> {L('Hinweis', 'Hint')}
                 </button>
                 <button className="btn" onClick={pz.showSolution} disabled={!puzzle}>
-                  <Eye size={16} /> Lösung
+                  <Eye size={16} /> {L('Lösung', 'Solution')}
                 </button>
               </>
             ) : (
               <button className="btn" onClick={() => puzzle && navigate(`analysis/fen:${encodeURIComponent(puzzle.fen)}`)}>
-                <Microscope size={16} /> Analysieren
+                <Microscope size={16} /> {L('Analysieren', 'Analyze')}
               </button>
             )}
             {daily ? (
               <button className="btn primary grow" onClick={() => navigate('puzzles')}>
-                <PuzzleIcon size={16} /> Weitere Puzzles
+                <PuzzleIcon size={16} /> {L('Weitere Puzzles', 'More puzzles')}
               </button>
             ) : (
               <button className={`btn grow ${finished ? 'primary' : ''}`} onClick={() => load()}>
-                {finished ? 'Nächstes Puzzle' : <><RotateCcw size={15} /> Überspringen</>}
+                {finished ? L('Nächstes Puzzle', 'Next puzzle') : <><RotateCcw size={15} /> {L('Überspringen', 'Skip')}</>}
               </button>
             )}
           </div>
@@ -253,14 +256,14 @@ export function Puzzles({ daily, loggedIn, settings }: PageProps & { daily: bool
           level={rating}
           context={context}
           onArrows={setArrows}
-          intro={daily ? 'Das Rätsel des Tages! Lass dir Zeit – und frag mich, wenn du nicht weiterkommst.' : 'Finde den stärksten Zug. Wenn du feststeckst, frag mich nach einem Tipp.'}
+          intro={daily ? L('Das Rätsel des Tages! Lass dir Zeit – und frag mich, wenn du nicht weiterkommst.', "The puzzle of the day! Take your time – and ask me if you get stuck.") : L('Finde den stärksten Zug. Wenn du feststeckst, frag mich nach einem Tipp.', "Find the strongest move. If you're stuck, ask me for a tip.")}
           quick={
             finished
               ? [
-                  { label: 'Erklär mir die Lösung', prompt: 'Erkläre die Lösung Zug für Zug: Welches Motiv steckt dahinter und warum funktionieren andere Züge nicht? Zeichne den Schlüsselzug als Pfeil.' },
-                  { label: 'Woran erkenne ich so was?', prompt: 'Woran kann ich solche Stellungen in eigenen Partien erkennen? Nenne 2–3 konkrete Signale.' },
+                  { label: L('Erklär mir die Lösung', 'Explain the solution'), prompt: L('Erkläre die Lösung Zug für Zug: Welches Motiv steckt dahinter und warum funktionieren andere Züge nicht? Zeichne den Schlüsselzug als Pfeil.', "Explain the solution move by move: which motif is behind it and why don't other moves work? Draw the key move as an arrow.") },
+                  { label: L('Woran erkenne ich so was?', 'How do I spot this?'), prompt: L('Woran kann ich solche Stellungen in eigenen Partien erkennen? Nenne 2–3 konkrete Signale.', 'How can I recognize positions like this in my own games? Name 2–3 concrete signals.') },
                 ]
-              : [{ label: 'Gib mir einen Tipp', prompt: 'Gib mir einen kleinen Tipp, ohne den Zug zu verraten. Keine Pfeile.' }]
+              : [{ label: L('Gib mir einen Tipp', 'Give me a tip'), prompt: L('Gib mir einen kleinen Tipp, ohne den Zug zu verraten. Keine Pfeile.', 'Give me a small tip without revealing the move. No arrows.') }]
           }
         />
       </section>

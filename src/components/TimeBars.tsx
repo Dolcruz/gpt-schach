@@ -1,3 +1,4 @@
+import { L } from '../i18n';
 import { useState } from 'react';
 import type { Classification } from '../coach';
 import { CLASS_INFO } from '../coach';
@@ -32,9 +33,9 @@ export function TimeBars({ times, clocks, sans, side, startsWhite, classes, curs
   return (
     <div className="time-bars">
       <div className="tb-head">
-        <b>Deine Bedenkzeit</b>
+        <b>{L('Deine Bedenkzeit', 'Your thinking time')}</b>
         <span>
-          Ø {fmt(total / own.length)} · längster Zug {Math.floor(slowest.i / 2) + 1}. {sans[slowest.i]} ({fmt(slowest.t)})
+          Ø {fmt(total / own.length)} · {L('längster Zug', 'longest move')} {Math.floor(slowest.i / 2) + 1}. {sans[slowest.i]} ({fmt(slowest.t)})
         </span>
       </div>
       <div className="tb-plot" onMouseLeave={() => setHover(null)}>
@@ -48,7 +49,7 @@ export function TimeBars({ times, clocks, sans, side, startsWhite, classes, curs
               style={{ height: `${Math.max(4, (t / max) * 100)}%`, background: bad ? CLASS_INFO[c!].color : c === 'inaccuracy' ? CLASS_INFO.inaccuracy.color : undefined }}
               onMouseEnter={() => setHover(i)}
               onClick={() => onSelect(i + 1)}
-              aria-label={`Zug ${Math.floor(i / 2) + 1}: ${fmt(t)}`}
+              aria-label={`${L('Zug', 'Move')} ${Math.floor(i / 2) + 1}: ${fmt(t)}`}
             />
           );
         })}
@@ -58,7 +59,7 @@ export function TimeBars({ times, clocks, sans, side, startsWhite, classes, curs
               {Math.floor(h.i / 2) + 1}. {sans[h.i]} · {fmt(h.t)}
             </b>
             <span>
-              {clocks?.[h.i] !== undefined ? `Restzeit ${clockFmt(clocks[h.i])}` : ''}
+              {clocks?.[h.i] !== undefined ? `${L('Restzeit', 'Time left')} ${clockFmt(clocks[h.i])}` : ''}
               {classes?.[h.i] ? ` · ${CLASS_INFO[classes[h.i]!].label}` : ''}
             </span>
           </div>

@@ -1,3 +1,4 @@
+import { L, lang } from '../i18n';
 // Varianten: Zugfolgen, die man auf dem Brett durchklicken kann
 import { useCallback, useMemo, useState } from 'react';
 import { Chess, type Move } from 'chess.js';
@@ -9,20 +10,21 @@ export interface Variation {
   title?: string;
 }
 
-const PIECE: Record<string, string> = { K: 'König', Q: 'Dame', R: 'Turm', B: 'Läufer', N: 'Springer' };
-const PROMO: Record<string, string> = { Q: 'Dame', R: 'Turm', B: 'Läufer', N: 'Springer' };
+const PIECE: Record<string, string> = lang === 'en' ? { K: 'King', Q: 'Queen', R: 'Rook', B: 'Bishop', N: 'Knight' } : { K: 'König', Q: 'Dame', R: 'Turm', B: 'Läufer', N: 'Springer' };
+const PROMO = PIECE;
 
 /** SAN in verständliche Worte, z. B. "Nxd4+" → "Springer schlägt auf d4, Schach" */
 export function sanToWords(san: string): string {
-  if (san.startsWith('O-O-O')) return 'Lange Rochade' + (san.endsWith('#') ? ', Matt' : san.endsWith('+') ? ', Schach' : '');
-  if (san.startsWith('O-O')) return 'Kurze Rochade' + (san.endsWith('#') ? ', Matt' : san.endsWith('+') ? ', Schach' : '');
+  const tail = san.endsWith('#') ? L(', Matt', ', mate') : san.endsWith('+') ? L(', Schach', ', check') : '';
+  if (san.startsWith('O-O-O')) return L('Lange Rochade', 'Long castling') + tail;
+  if (san.startsWith('O-O')) return L('Kurze Rochade', 'Short castling') + tail;
   const m = san.match(/^([KQRBN])?([a-h]?[1-8]?)(x)?([a-h][1-8])(=([QRBN]))?([+#])?/);
   if (!m) return san;
-  const piece = m[1] ? PIECE[m[1]] : 'Bauer';
-  let s = `${piece} ${m[3] ? 'schlägt auf' : 'nach'} ${m[4]}`;
-  if (m[6]) s += `, wird zur ${PROMO[m[6]]}`;
-  if (m[7] === '#') s += ' – Matt!';
-  else if (m[7] === '+') s += ', Schach';
+  const piece = m[1] ? PIECE[m[1]] : L('Bauer', 'Pawn');
+  let s = `${piece} ${m[3] ? L('schlägt auf', 'takes on') : L('nach', 'to')} ${m[4]}`;
+  if (m[6]) s += L(`, wird zur ${PROMO[m[6]]}`, `, promotes to a ${PROMO[m[6]].toLowerCase()}`);
+  if (m[7] === '#') s += L(' – Matt!', ' – mate!');
+  else if (m[7] === '+') s += L(', Schach', ', check');
   return s;
 }
 
@@ -32,8 +34,8 @@ export function extractMarkers(text: string): { text: string; lines: string[][];
   let arrows: string[] = [];
   const kept: string[] = [];
   for (const raw of text.split(/\r?\n/)) {
-    const v = raw.match(/^\s*\**VARIANTE\**\s*:\s*(.+)$/i);
-    const a = raw.match(/^\s*\**PFEILE\**\s*:\s*(.+)$/i);
+    const v = raw.match(/^\s*\**(?:VARIANTE|VARIATION)\**\s*:\s*(.+)$/i);
+    const a = raw.match(/^\s*\**(?:PFEILE|ARROWS)\**\s*:\s*(.+)$/i);
     if (v) {
       const sans = v[1]
         .replace(/\d+\.(\.\.)?/g, ' ')
@@ -49,7 +51,8 @@ export function extractMarkers(text: string): { text: string; lines: string[][];
 }
 
 /** Während des Streamens die Marker-Zeilen ausblenden */
-export const hideMarkers = (t: string) => t.replace(/\n?[^\n]*\b(VARIANTE|PFEILE)\b\s*:[^\n]*/gi, '').replace(/\n\s*\**(VARIANT|VARIAN|VARIA|VARI|PFEIL|PFEI)\w*$/i, '');
+export const hideMarkers = (t: string) =>
+  t.replace(/\n?[^\n]*\b(VARIANTE|VARIATION|PFEILE|ARROWS)\b\s*:[^\n]*/gi, '').replace(/\n\s*\**(VARIATI|VARIAT|VARIANT|VARIAN|VARIA|VARI|PFEIL|PFEI|ARROW|ARRO)\w*$/i, '');
 
 /** Prüft eine Zugfolge gegen mögliche Startstellungen; nimmt die, in der am meisten legal ist */
 export function resolveVariation(sans: string[], fens: string[], title?: string): Variation | null {

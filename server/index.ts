@@ -4,6 +4,7 @@ import path from 'node:path';
 import { Chess } from 'chess.js';
 import { authHeaders, importCodex, logout, refresh, startLogin, status } from './auth.ts';
 import { isCollection, list, remove, upsert } from './store.ts';
+import { langMiddleware, T } from './i18n.ts';
 
 const PORT = Number(process.env.SERVER_PORT ?? 3001);
 const APP_URL = process.env.APP_URL ?? 'http://localhost:5173';
@@ -13,6 +14,7 @@ const CLIENT_VERSION = process.env.CODEX_CLIENT_VERSION ?? '0.163.0';
 
 const app = express();
 app.use(express.json({ limit: '5mb' }));
+app.use(langMiddleware);
 
 const wrap = (fn: (req: express.Request, res: express.Response) => Promise<unknown> | unknown) => async (req: express.Request, res: express.Response) => {
   try {
@@ -44,21 +46,21 @@ app.post('/api/auth/logout', wrap(() => (logout(), status())));
 app.get(
   '/api/store/:col',
   wrap((req) => {
-    if (!isCollection(String(req.params.col))) throw Object.assign(new Error('Unbekannte Sammlung'), { status: 404 });
+    if (!isCollection(String(req.params.col))) throw Object.assign(new Error(T('Unbekannte Sammlung', 'Unknown collection')), { status: 404 });
     return list(String(req.params.col) as any);
   }),
 );
 app.put(
   '/api/store/:col/:id',
   wrap((req) => {
-    if (!isCollection(String(req.params.col))) throw Object.assign(new Error('Unbekannte Sammlung'), { status: 404 });
+    if (!isCollection(String(req.params.col))) throw Object.assign(new Error(T('Unbekannte Sammlung', 'Unknown collection')), { status: 404 });
     return upsert(String(req.params.col) as any, { ...req.body, id: String(req.params.id) });
   }),
 );
 app.delete(
   '/api/store/:col/:id',
   wrap((req) => {
-    if (!isCollection(String(req.params.col))) throw Object.assign(new Error('Unbekannte Sammlung'), { status: 404 });
+    if (!isCollection(String(req.params.col))) throw Object.assign(new Error(T('Unbekannte Sammlung', 'Unknown collection')), { status: 404 });
     remove(String(req.params.col) as any, String(req.params.id));
     return { ok: true };
   }),
@@ -87,7 +89,7 @@ function normalizePuzzle(j: any) {
 
 async function lichess(pathAndQuery: string) {
   const r = await fetch(`https://lichess.org/api${pathAndQuery}`, { headers: { Accept: 'application/json' } });
-  if (!r.ok) throw Object.assign(new Error(`Lichess antwortet mit ${r.status}`), { status: r.status === 429 ? 429 : 502 });
+  if (!r.ok) throw Object.assign(new Error(`${T('Lichess antwortet mit', 'Lichess responded with')} ${r.status}`), { status: r.status === 429 ? 429 : 502 });
   return r.json();
 }
 
@@ -173,7 +175,7 @@ app.get(
   wrap(async () => {
     if (modelCache && Date.now() - modelCache.at < 10 * 60_000) return modelCache.data;
     const r = await codexFetch(`${CODEX_BASE}/models?client_version=${CLIENT_VERSION}`);
-    if (!r.ok) throw Object.assign(new Error(`Modelle konnten nicht geladen werden (${r.status})`), { status: r.status });
+    if (!r.ok) throw Object.assign(new Error(`${T('Modelle konnten nicht geladen werden', 'Could not load models')} (${r.status})`), { status: r.status });
     const j: any = await r.json();
     const models = (j.models ?? [])
       .filter((m: any) => m.visibility !== 'hide')
@@ -225,7 +227,7 @@ app.post(
         const j = JSON.parse(text);
         msg = j.detail ?? j.error?.message ?? text;
       } catch {}
-      throw Object.assign(new Error(msg || `Fehler ${upstream.status}`), { status: upstream.status });
+      throw Object.assign(new Error(msg || `${T('Fehler', 'Error')} ${upstream.status}`), { status: upstream.status });
     }
 
     res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });

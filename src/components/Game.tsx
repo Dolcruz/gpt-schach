@@ -1,3 +1,4 @@
+import { L } from '../i18n';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Chess, type Move } from 'chess.js';
 import type { DrawShape } from 'chessground/draw';
@@ -185,7 +186,10 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
         playerColor,
         opponent: `${bot.name} (${bot.rating})`,
         level: bot.rating,
-        note: `HINWEIS: Der Schüler ERKUNDET gerade hypothetische Züge, die in der Partie NICHT gespielt wurden: ${x.sans.slice(0, x.idx).join(' ') || '(noch keine)'}. Die Stellung unten ist die erkundete Stellung. Erkläre, was in dieser Variante passiert.`,
+        note: L(
+          `HINWEIS: Der Schüler ERKUNDET gerade hypothetische Züge, die in der Partie NICHT gespielt wurden: ${x.sans.slice(0, x.idx).join(' ') || '(noch keine)'}. Die Stellung unten ist die erkundete Stellung. Erkläre, was in dieser Variante passiert.`,
+          `NOTE: The student is EXPLORING hypothetical moves that were NOT played in the game: ${x.sans.slice(0, x.idx).join(' ') || '(none yet)'}. The position below is the explored position. Explain what happens in this line.`,
+        ),
         evalText: xe.top ? formatScore(xe.top.cp, xe.top.mate) : undefined,
         topLines: xe.lines.map((l) => `${formatScore(l.score * sign, l.mate !== null ? l.mate * sign : null)}: ${pvToSan(f, l.pv, 6).join(' ')}`),
       };
@@ -234,14 +238,14 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
         const known = opts.review ? [opts.review.bestPvSan, opts.review.replyPvSan] : [];
         const isKnown = (v: Variation) => known.some((k) => k.length && v.sans.every((s, i) => i >= k.length || s === k[i]) && v.sans[0] === k[0]);
         const variations = lines
-          .map((l, i) => resolveVariation(l, fens, lines.length > 1 ? `Coach-Variante ${i + 1}` : 'Coach-Variante'))
+          .map((l, i) => resolveVariation(l, fens, lines.length > 1 ? `${L('Coach-Variante', 'Coach line')} ${i + 1}` : L('Coach-Variante', 'Coach line')))
           .filter((v): v is Variation => !!v && !isKnown(v));
         patchMsg(id, { text, streaming: false, variations });
         if (opts.drawArrows !== false && arrows.length && e === epoch.current)
           setShapes(arrows.map((a) => ({ orig: a.slice(0, 2) as Key, dest: a.slice(2, 4) as Key, brush: 'green' })));
       } catch (err: any) {
         if (err.name === 'AbortError') setMsgs((ms) => ms.flatMap((m) => (m.id !== id ? [m] : m.text || m.review ? [{ ...m, streaming: false }] : [])));
-        else patchMsg(id, { text: `Coach nicht erreichbar: ${err.message}`, streaming: false, error: true });
+        else patchMsg(id, { text: `${L('Coach nicht erreichbar', 'Coach unavailable')}: ${err.message}`, streaming: false, error: true });
       } finally {
         moveStreams.current.delete(ctl);
       }
@@ -273,20 +277,20 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
   const checkOver = useCallback(() => {
     const c = chess.current;
     if (!c.isGameOver()) return false;
-    let title = 'Remis';
-    let reason = 'Remis';
+    let title = L('Remis', 'Draw');
+    let reason = L('Remis', 'Draw');
     let result: 'win' | 'loss' | 'draw' = 'draw';
     if (c.isCheckmate()) {
       const playerWon = c.turn() !== playerColor;
       result = playerWon ? 'win' : 'loss';
-      title = playerWon ? 'Du hast gewonnen!' : `${bot.name} gewinnt`;
-      reason = 'durch Schachmatt';
+      title = playerWon ? L('Du hast gewonnen!', 'You won!') : L(`${bot.name} gewinnt`, `${bot.name} wins`);
+      reason = L('durch Schachmatt', 'by checkmate');
       const l = botLine(bot, playerWon ? 'botLose' : 'botWin');
       if (l) addMsg({ from: 'bot', text: l });
-    } else if (c.isStalemate()) reason = 'durch Patt';
-    else if (c.isThreefoldRepetition()) reason = 'durch dreifache Wiederholung';
-    else if (c.isInsufficientMaterial()) reason = 'durch ungenügendes Material';
-    else reason = 'durch 50-Züge-Regel';
+    } else if (c.isStalemate()) reason = L('durch Patt', 'by stalemate');
+    else if (c.isThreefoldRepetition()) reason = L('durch dreifache Wiederholung', 'by threefold repetition');
+    else if (c.isInsufficientMaterial()) reason = L('durch ungenügendes Material', 'by insufficient material');
+    else reason = L('durch 50-Züge-Regel', 'by the 50-move rule');
     setOver({ title, reason, result });
     clock.current.running = false;
     setShowModal(true);
@@ -468,7 +472,7 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
         return;
       }
       undoToPlayer();
-      addMsg({ from: 'coach', text: a === 'retry' ? 'Okay, versuch es nochmal! Schau genau, was der Gegner droht.' : `Besser war ${review?.bestSan}. Probier es aus!` });
+      addMsg({ from: 'coach', text: a === 'retry' ? L('Okay, versuch es nochmal! Schau genau, was der Gegner droht.', 'Okay, try again! Look closely at what your opponent threatens.') : L(`Besser war ${review?.bestSan}. Probier es aus!`, `${review?.bestSan} was better. Give it a try!`) });
       if (a === 'showBest' && review)
         setShapes([{ orig: review.bestUci.slice(0, 2) as Key, dest: review.bestUci.slice(2, 4) as Key, brush: 'green' }]);
     },
@@ -487,10 +491,10 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
     if (next >= 3 || !flags.current.loggedIn) {
       if (next === 1 && !flags.current.loggedIn) {
         setShapes([{ orig: best.slice(0, 2) as Key, brush: 'green' }]);
-        addMsg({ from: 'coach', text: 'Schau dir diese Figur genauer an.' });
+        addMsg({ from: 'coach', text: L('Schau dir diese Figur genauer an.', 'Take a closer look at this piece.') });
       } else {
         setShapes([{ orig: best.slice(0, 2) as Key, dest: best.slice(2, 4) as Key, brush: 'green' }]);
-        addMsg({ from: 'coach', text: `Der stärkste Zug ist ${pvToSan(c.fen(), [best], 1)[0]}.` });
+        addMsg({ from: 'coach', text: L(`Der stärkste Zug ist ${pvToSan(c.fen(), [best], 1)[0]}.`, `The strongest move is ${pvToSan(c.fen(), [best], 1)[0]}.`) });
       }
       return;
     }
@@ -504,14 +508,14 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
     setInput('');
     addMsg({ from: 'user', text: q });
     if (!flags.current.loggedIn) {
-      addMsg({ from: 'coach', text: 'Melde dich links unten mit ChatGPT an, damit ich deine Fragen beantworten kann.', error: true });
+      addMsg({ from: 'coach', text: L('Melde dich links unten mit ChatGPT an, damit ich deine Fragen beantworten kann.', 'Sign in with ChatGPT at the bottom left so I can answer your questions.'), error: true });
       return;
     }
     setBusy(true);
     const history: ChatMsg[] = msgs
       .filter((m) => (m.from === 'user' || m.from === 'coach') && m.text && !m.error)
       .slice(-8)
-      .map((m) => ({ role: m.from === 'user' ? 'user' : 'assistant', content: m.review ? `[Kommentar zu ${m.review.san}] ${m.text}` : m.text }));
+      .map((m) => ({ role: m.from === 'user' ? 'user' : 'assistant', content: m.review ? `[${L('Kommentar zu', 'Comment on')} ${m.review.san}] ${m.text}` : m.text }));
     await askCoach(chatPrompt(await context(), q), { history, chat: true });
     setBusy(false);
   }, [addMsg, askCoach, busy, context, input, msgs]);
@@ -520,7 +524,7 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
     epoch.current++;
     setThinking(false);
     clock.current.running = false;
-    setOver({ title: `${bot.name} gewinnt`, reason: 'durch Aufgabe', result: 'loss' });
+    setOver({ title: L(`${bot.name} gewinnt`, `${bot.name} wins`), reason: L('durch Aufgabe', 'by resignation'), result: 'loss' });
     setShowModal(true);
     const l = botLine(bot, 'botWin');
     if (l) addMsg({ from: 'bot', text: l });
@@ -528,13 +532,19 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
 
   const discussGame = useCallback(async () => {
     setShowModal(false);
-    const rs = Object.entries(reviews).map(([ply, r]) => `${Math.floor(Number(ply) / 2) + 1}${Number(ply) % 2 ? '...' : '.'} ${r.san}: ${CLASS_INFO[r.classification].label}${r.classification !== 'best' && r.classification !== 'book' ? ` (besser ${r.bestSan})` : ''}`);
+    const rs = Object.entries(reviews).map(([ply, r]) => `${Math.floor(Number(ply) / 2) + 1}${Number(ply) % 2 ? '...' : '.'} ${r.san}: ${CLASS_INFO[r.classification].label}${r.classification !== 'best' && r.classification !== 'book' ? ` (${L('besser', 'better')} ${r.bestSan})` : ''}`);
     askCoach(
-      `${contextBlock2()}\nErgebnis: ${over?.title} ${over?.reason}\nBewertung meiner Züge:\n${rs.join('\n')}\n\nGib mir eine kurze Partie-Besprechung wie das Game Review auf chess.com: 1) Was lief gut, 2) die 2–3 Schlüsselmomente, 3) ein konkreter Trainingstipp. Max. 150 Wörter.`,
+      L(
+        `${contextBlock2()}\nErgebnis: ${over?.title} ${over?.reason}\nBewertung meiner Züge:\n${rs.join('\n')}\n\nGib mir eine kurze Partie-Besprechung wie das Game Review auf chess.com: 1) Was lief gut, 2) die 2–3 Schlüsselmomente, 3) ein konkreter Trainingstipp. Max. 150 Wörter.`,
+        `${contextBlock2()}\nResult: ${over?.title} ${over?.reason}\nRating of my moves:\n${rs.join('\n')}\n\nGive me a short game review like on the big chess sites: 1) what went well, 2) the 2–3 key moments, 3) one concrete training tip. Max. 150 words.`,
+      ),
       { drawArrows: false },
     );
     function contextBlock2() {
-      return `Partie (SAN): ${chess.current.pgn()}\nIch spielte ${playerColor === 'w' ? 'Weiß' : 'Schwarz'} gegen ${bot.name} (${bot.rating}).`;
+      return L(
+        `Partie (SAN): ${chess.current.pgn()}\nIch spielte ${playerColor === 'w' ? 'Weiß' : 'Schwarz'} gegen ${bot.name} (${bot.rating}).`,
+        `Game (SAN): ${chess.current.pgn()}\nI played ${playerColor === 'w' ? 'White' : 'Black'} against ${bot.name} (${bot.rating}).`,
+      );
     }
   }, [askCoach, bot, over, playerColor, reviews]);
 
@@ -560,9 +570,9 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
       // Kann der andere überhaupt noch mattsetzen? Sonst Remis
       const pieces = chess.current.board().flat().filter((x) => x && x.color !== loser && x.type !== 'k');
       const canMate = pieces.some((x) => x!.type === 'p' || x!.type === 'q' || x!.type === 'r') || pieces.length >= 2;
-      if (!canMate) setOver({ title: 'Remis', reason: 'Zeit abgelaufen, aber zu wenig Material zum Mattsetzen', result: 'draw' });
-      else if (loser === playerColor) setOver({ title: `${bot.name} gewinnt`, reason: 'durch Zeitüberschreitung', result: 'loss' });
-      else setOver({ title: 'Du hast gewonnen!', reason: 'durch Zeitüberschreitung', result: 'win' });
+      if (!canMate) setOver({ title: L('Remis', 'Draw'), reason: L('Zeit abgelaufen, aber zu wenig Material zum Mattsetzen', 'Time ran out, but not enough material to mate'), result: 'draw' });
+      else if (loser === playerColor) setOver({ title: L(`${bot.name} gewinnt`, `${bot.name} wins`), reason: L('durch Zeitüberschreitung', 'on time'), result: 'loss' });
+      else setOver({ title: L('Du hast gewonnen!', 'You won!'), reason: L('durch Zeitüberschreitung', 'on time'), result: 'win' });
       setShowModal(true);
       playSound('end');
     }, 100);
@@ -578,8 +588,8 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
       addMsg({
         from: 'coach',
         text: loggedIn
-          ? `Hallo! Ich bin dein Coach. Ich bewerte jeden deiner Züge und erkläre dir, was dahintersteckt. Frag mich jederzeit etwas!`
-          : 'Hallo! Ich bewerte deine Züge mit Stockfish. Für echte Erklärungen melde dich links unten mit ChatGPT an.',
+          ? L('Hallo! Ich bin dein Coach. Ich bewerte jeden deiner Züge und erkläre dir, was dahintersteckt. Frag mich jederzeit etwas!', "Hi! I'm your coach. I'll rate every move you make and explain what's behind it. Ask me anything, anytime!")
+          : L('Hallo! Ich bewerte deine Züge mit Stockfish. Für echte Erklärungen melde dich links unten mit ChatGPT an.', 'Hi! I rate your moves with Stockfish. For real explanations, sign in with ChatGPT at the bottom left.'),
       });
       if (bot.id !== 'coach' && l) addMsg({ from: 'bot', text: l });
     } else if (l) addMsg({ from: 'bot', text: l });
@@ -722,10 +732,10 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
 
   const bar = (side: 'w' | 'b') =>
     side === playerColor ? (
-      <PlayerBar avatar="you" name="Du" active={turn === side && !over} right={tc && <Clock ms={clockView[side]} active={turn === side && !over && clock.current.running} />}>
+      <PlayerBar avatar="you" name={L('Du', 'You')} active={turn === side && !over} right={tc && <Clock ms={clockView[side]} active={turn === side && !over && clock.current.running} />}>
         <div className="bar-sub">
           <Captured moves={moves} side={side} />
-          {accuracy !== null && <span className="acc">{accuracy.toFixed(1)} % Genauigkeit</span>}
+          {accuracy !== null && <span className="acc">{accuracy.toFixed(1)} % {L('Genauigkeit', 'accuracy')}</span>}
         </div>
       </PlayerBar>
     ) : (
@@ -773,7 +783,7 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
             />
             {viewing && !vv.active && !ex.active && (
               <button className="view-pill" onClick={() => goView(null)}>
-                Du siehst Zug {Math.ceil(viewPly! / 2) || 0} · <b>Zurück zur aktuellen Stellung</b> <ChevronLast size={15} />
+                {L('Du siehst Zug', 'Viewing move')} {Math.ceil(viewPly! / 2) || 0} · <b>{L('Zurück zur aktuellen Stellung', 'Back to current position')}</b> <ChevronLast size={15} />
               </button>
             )}
             {promotion && (
@@ -791,7 +801,7 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
                       <Piece type={p} color={playerColor} size={64} />
                     </button>
                   ))}
-                  <button className="promo-x" onClick={() => (setPromotion(null), sync())} title="Abbrechen">
+                  <button className="promo-x" onClick={() => (setPromotion(null), sync())} title={L('Abbrechen', 'Cancel')}>
                     <X size={20} />
                   </button>
                 </div>
@@ -800,7 +810,7 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
             {over && showModal && (
               <div className="over">
                 <div className="over-card">
-                  <button className="over-close" onClick={() => setShowModal(false)} title="Brett ansehen">
+                  <button className="over-close" onClick={() => setShowModal(false)} title={L('Brett ansehen', 'View board')}>
                     <X size={18} />
                   </button>
                   <div className="over-head">
@@ -816,7 +826,7 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
                           <div key={id}>
                             <Crown size={22} fill="currentColor" />
                             <span>
-                              <b>Neue Krone: {c.label}</b>
+                              <b>{L('Neue Krone', 'New crown')}: {c.label}</b>
                               <small>{c.desc}</small>
                             </span>
                           </div>
@@ -827,7 +837,7 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
                   <div className="over-vs">
                     <div>
                       <Avatar id="you" size={64} />
-                      <span>Du</span>
+                      <span>{L('Du', 'You')}</span>
                     </div>
                     <b>vs</b>
                     <div>
@@ -837,25 +847,25 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
                   </div>
                   {accuracy !== null && (
                     <div className="over-acc">
-                      <span>Genauigkeit</span>
+                      <span>{L('Genauigkeit', 'Accuracy')}</span>
                       <b>{accuracy.toFixed(1)}</b>
                     </div>
                   )}
                   <div className="over-btns">
                     {loggedIn && Object.keys(reviews).length > 0 && (
                       <button className="btn primary block" onClick={discussGame}>
-                        <GraduationCap size={18} /> Partie besprechen
+                        <GraduationCap size={18} /> {L('Partie besprechen', 'Review with coach')}
                       </button>
                     )}
                     <button className="btn block" onClick={() => navigate(`analysis/${gameId.current}`)}>
-                      <Microscope size={16} /> Partie analysieren
+                      <Microscope size={16} /> {L('Partie analysieren', 'Analyze game')}
                     </button>
                     <div className="over-row">
                       <button className="btn block" onClick={onRematch}>
-                        <RotateCcw size={16} /> Revanche
+                        <RotateCcw size={16} /> {L('Revanche', 'Rematch')}
                       </button>
                       <button className="btn block" onClick={onExit}>
-                        <Plus size={16} /> Neuer Gegner
+                        <Plus size={16} /> {L('Neuer Gegner', 'New opponent')}
                       </button>
                     </div>
                   </div>
@@ -870,8 +880,8 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
       <section className="panel game-panel">
         <header className="panel-head">
           {coach ? <GraduationCap size={22} /> : <Swords size={20} />}
-          <h1>{coach ? 'Coach' : `Gegen ${bot.name}`}</h1>
-          {coach && <span className="head-meta">{loggedIn ? settings.model : 'nur Engine'}</span>}
+          <h1>{coach ? 'Coach' : L(`Gegen ${bot.name}`, `vs ${bot.name}`)}</h1>
+          {coach && <span className="head-meta">{loggedIn ? settings.model : L('nur Engine', 'engine only')}</span>}
         </header>
 
         <ExplorePanel ex={ex} lines={exEval.lines} top={exEval.top} lastClass={exEval.lastClass} />
@@ -894,17 +904,17 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
                   <div className="actions">
                     {m.actions.includes('retry') && (
                       <button className="btn primary small" onClick={() => onAction('retry', m.review)}>
-                        <Undo2 size={15} /> Nochmal versuchen
+                        <Undo2 size={15} /> {L('Nochmal versuchen', 'Try again')}
                       </button>
                     )}
                     {m.actions.includes('showBest') && (
                       <button className="btn small" onClick={() => onAction('showBest', m.review)}>
-                        Besten Zug zeigen
+                        {L('Besten Zug zeigen', 'Show best move')}
                       </button>
                     )}
                     {m.actions.includes('continue') && (
                       <button className="btn ghost small" onClick={() => onAction('continue', m.review)}>
-                        Weiterspielen
+                        {L('Weiterspielen', 'Continue')}
                       </button>
                     )}
                   </div>
@@ -923,15 +933,15 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
               sendChat();
             }}
           >
-            <input value={input} onChange={(e) => setInput(e.target.value)} placeholder={loggedIn ? 'Frag den Coach …' : 'Anmelden, um Fragen zu stellen'} disabled={!loggedIn} />
-            <button className="send" disabled={busy || !input.trim()} title="Senden">
+            <input value={input} onChange={(e) => setInput(e.target.value)} placeholder={loggedIn ? L('Frag den Coach …', 'Ask the coach …') : L('Anmelden, um Fragen zu stellen', 'Sign in to ask questions')} disabled={!loggedIn} />
+            <button className="send" disabled={busy || !input.trim()} title={L('Senden', 'Send')}>
               <SendHorizontal size={18} />
             </button>
           </form>
         )}
 
         <div className="moves">
-          {pairs.length === 0 && <div className="moves-empty">Noch keine Züge</div>}
+          {pairs.length === 0 && <div className="moves-empty">{L('Noch keine Züge', 'No moves yet')}</div>}
           {pairs.map(([w, b, i]) => (
             <div className="move-row" key={i}>
               <span className="num">{i / 2 + 1}.</span>
@@ -941,16 +951,16 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
           ))}
         </div>
         <div className="nav-bar game-nav">
-          <button className="ctrl" onClick={() => goView(0)} disabled={!moves.length || viewPly === 0} title="Zum Anfang">
+          <button className="ctrl" onClick={() => goView(0)} disabled={!moves.length || viewPly === 0} title={L('Zum Anfang', 'To the start')}>
             <ChevronFirst size={19} />
           </button>
-          <button className="ctrl" onClick={() => goView((viewing ? viewPly! : moves.length) - 1)} disabled={!moves.length || viewPly === 0} title="Einen Zug zurück ansehen (←)">
+          <button className="ctrl" onClick={() => goView((viewing ? viewPly! : moves.length) - 1)} disabled={!moves.length || viewPly === 0} title={L('Einen Zug zurück ansehen (←)', 'View one move back (←)')}>
             <ChevronLeft size={19} />
           </button>
-          <button className="ctrl" onClick={() => goView(viewing ? viewPly! + 1 : null)} disabled={!viewing} title="Einen Zug vor (→)">
+          <button className="ctrl" onClick={() => goView(viewing ? viewPly! + 1 : null)} disabled={!viewing} title={L('Einen Zug vor (→)', 'One move forward (→)')}>
             <ChevronRight size={19} />
           </button>
-          <button className="ctrl" onClick={() => goView(null)} disabled={!viewing} title="Zur aktuellen Stellung">
+          <button className="ctrl" onClick={() => goView(null)} disabled={!viewing} title={L('Zur aktuellen Stellung', 'To the current position')}>
             <ChevronLast size={19} />
           </button>
         </div>
@@ -959,17 +969,17 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
           {coach && (
             <button className="ctrl hint" onClick={hint} disabled={!canMove}>
               <Lightbulb size={20} />
-              <span>Hinweis{hintLevel ? ` ${Math.min(hintLevel + 1, 3)}/3` : ''}</span>
+              <span>{L('Hinweis', 'Hint')}{hintLevel ? ` ${Math.min(hintLevel + 1, 3)}/3` : ''}</span>
             </button>
           )}
           {!timed && (<>
-          <button className="ctrl" onClick={undoToPlayer} disabled={!moves.length} title="Deinen letzten Zug zurücknehmen">
+          <button className="ctrl" onClick={undoToPlayer} disabled={!moves.length} title={L('Deinen letzten Zug zurücknehmen', 'Take back your last move')}>
             <Undo2 size={20} />
-            <span>Zurücknehmen</span>
+            <span>{L('Zurücknehmen', 'Take back')}</span>
           </button>
-          <button className="ctrl" onClick={redoMoves} disabled={!redoCount} title="Zurückgenommene Züge wiederherstellen">
+          <button className="ctrl" onClick={redoMoves} disabled={!redoCount} title={L('Zurückgenommene Züge wiederherstellen', 'Restore taken-back moves')}>
             <Redo2 size={20} />
-            <span>Wiederholen</span>
+            <span>{L('Wiederholen', 'Redo')}</span>
           </button>
           </>)}
           {!timed && (
@@ -977,29 +987,29 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
               className={`ctrl ${ex.active ? 'on' : ''}`}
               onClick={() => (ex.active ? ex.close() : startExplore())}
               disabled={thinking && !ex.active}
-              title="Von hier aus frei für beide Seiten ziehen und die Bewertung sehen – die Partie bleibt unverändert"
+              title={L('Von hier aus frei für beide Seiten ziehen und die Bewertung sehen – die Partie bleibt unverändert', 'Move both sides freely from here and watch the evaluation – the game stays unchanged')}
             >
               <Compass size={20} />
-              <span>{ex.active ? 'Beenden' : 'Erkunden'}</span>
+              <span>{ex.active ? L('Beenden', 'Stop') : L('Erkunden', 'Explore')}</span>
             </button>
           )}
           <button className="ctrl" onClick={() => setOrientation((o) => (o === 'white' ? 'black' : 'white'))}>
             <ArrowUpDown size={20} />
-            <span>Drehen</span>
+            <span>{L('Drehen', 'Flip')}</span>
           </button>
           <button className={`ctrl ${showEval ? 'on' : ''}`} onClick={() => setShowEval(!showEval)}>
             <ChartNoAxesColumn size={20} />
-            <span>Bewertung</span>
+            <span>{L('Bewertung', 'Eval')}</span>
           </button>
           {!over ? (
             <button className="ctrl" onClick={resign} disabled={!moves.length}>
               <Flag size={20} />
-              <span>Aufgeben</span>
+              <span>{L('Aufgeben', 'Resign')}</span>
             </button>
           ) : (
             <button className="ctrl" onClick={onRematch}>
               <RotateCcw size={20} />
-              <span>Neu</span>
+              <span>{L('Neu', 'New')}</span>
             </button>
           )}
         </div>
@@ -1009,16 +1019,16 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
             <>
               <label className="mini-switch">
                 <input type="checkbox" className="switch sm" checked={commentAll} onChange={(e) => setCommentAll(e.target.checked)} />
-                Jeden Zug erklären
+                {L('Jeden Zug erklären', 'Explain every move')}
               </label>
               <label className="mini-switch">
                 <input type="checkbox" className="switch sm" checked={explainOpp} onChange={(e) => setExplainOpp(e.target.checked)} />
-                Gegnerzüge erklären
+                {L('Gegnerzüge erklären', "Explain opponent's moves")}
               </label>
             </>
           )}
           <button className="link-btn back" onClick={onExit}>
-            <ArrowLeft size={14} /> Menü
+            <ArrowLeft size={14} /> {L('Menü', 'Menu')}
           </button>
         </footer>
       </section>
@@ -1029,9 +1039,9 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
 function ReviewHead({ r, onOpen, vv }: { r: MoveReview; onOpen: (v: Variation, idx: number) => void; vv: ReturnType<typeof useVariationView> }) {
   const ci = CLASS_INFO[r.classification];
   const showBetter = !['best', 'book', 'great', 'excellent'].includes(r.classification);
-  const better = useMemo<Variation | null>(() => (showBetter && r.bestPvSan.length ? { startFen: r.fenBefore, sans: r.bestPvSan, title: `Besser: ${r.bestSan}` } : null), [r, showBetter]);
+  const better = useMemo<Variation | null>(() => (showBetter && r.bestPvSan.length ? { startFen: r.fenBefore, sans: r.bestPvSan, title: L(`Besser: ${r.bestSan}`, `Better: ${r.bestSan}`) } : null), [r, showBetter]);
   const threat = useMemo<Variation | null>(
-    () => (['inaccuracy', 'mistake', 'blunder'].includes(r.classification) && r.replyPvSan.length ? { startFen: r.fenAfter, sans: r.replyPvSan, title: 'Was jetzt droht' } : null),
+    () => (['inaccuracy', 'mistake', 'blunder'].includes(r.classification) && r.replyPvSan.length ? { startFen: r.fenAfter, sans: r.replyPvSan, title: L('Was jetzt droht', 'What it threatens now') } : null),
     [r],
   );
   return (
@@ -1043,7 +1053,7 @@ function ReviewHead({ r, onOpen, vv }: { r: MoveReview; onOpen: (v: Variation, i
       <span className="eval-pill">{r.evalAfter}</span>
       {showBetter && r.bestSan && (
         <div className="review-better">
-          Besser war <b>{r.bestSan}</b>
+          {L('Besser war', 'Better was')} <b>{r.bestSan}</b>
         </div>
       )}
       {better && <VariationLine v={better} onOpen={onOpen} active={vv.variation === better} activeIdx={vv.idx} />}

@@ -1,3 +1,4 @@
+import { L } from '../i18n';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, LogOut, Sparkles } from 'lucide-react';
 import { api, type AuthInfo, type ModelInfo } from '../api';
@@ -15,7 +16,7 @@ interface Props {
 }
 
 const EFFORT_LABEL: Record<string, string> = {
-  none: 'Aus', minimal: 'Minimal', low: 'Niedrig', medium: 'Mittel', high: 'Hoch', xhigh: 'Sehr hoch', max: 'Max', ultra: 'Ultra',
+  none: L('Aus', 'Off'), minimal: 'Minimal', low: L('Niedrig', 'Low'), medium: L('Mittel', 'Medium'), high: L('Hoch', 'High'), xhigh: L('Sehr hoch', 'Very high'), max: 'Max', ultra: 'Ultra',
 };
 
 /** Konto- und Modellbereich unten in der Sidebar */
@@ -84,12 +85,12 @@ export function AccountBar({ auth, setAuth, settings, setSettings }: Props) {
         <div className="account-title">
           <Sparkles size={14} /> Coach-KI
         </div>
-        <p className="account-hint">Verbinde dein ChatGPT-Abo, damit der Coach Züge erklärt.</p>
+        <p className="account-hint">{L('Verbinde dein ChatGPT-Abo, damit der Coach Züge erklärt.', 'Connect your ChatGPT subscription so the coach can explain moves.')}</p>
         <button className="btn primary block" onClick={login} disabled={busy}>
-          <OpenAIIcon /> {busy ? 'Warte auf Login …' : 'Mit ChatGPT anmelden'}
+          <OpenAIIcon /> {busy ? L('Warte auf Login …', 'Waiting for login …') : L('Mit ChatGPT anmelden', 'Sign in with ChatGPT')}
         </button>
         <button className="link-btn" onClick={importCodex}>
-          Codex-Login übernehmen
+          {L('Codex-Login übernehmen', 'Use Codex login')}
         </button>
         {error && <p className="account-err">{error}</p>}
       </div>
@@ -102,7 +103,7 @@ export function AccountBar({ auth, setAuth, settings, setSettings }: Props) {
         <Sparkles size={14} /> Coach-KI
       </div>
       <Select
-        label="Modell"
+        label={L('Modell', 'Model')}
         value={settings.model}
         options={(model ? models : [{ id: settings.model, name: settings.model || '…' } as ModelInfo, ...models]).map((m) => ({ value: m.id, label: m.name }))}
         onChange={(v) => {
@@ -112,7 +113,7 @@ export function AccountBar({ auth, setAuth, settings, setSettings }: Props) {
       />
       {model && model.efforts.length > 0 && (
         <Select
-          label="Denkaufwand"
+          label={L('Denkaufwand', 'Reasoning effort')}
           value={settings.effort}
           options={model.efforts.map((e) => ({ value: e, label: EFFORT_LABEL[e] ?? e }))}
           onChange={(v) => setSettings({ ...settings, effort: v })}
@@ -124,7 +125,7 @@ export function AccountBar({ auth, setAuth, settings, setSettings }: Props) {
           {auth.email ?? 'ChatGPT'}
         </span>
         {auth.plan && <span className="plan">{auth.plan}</span>}
-        <button className="icon-btn" title="Abmelden" onClick={async () => setAuth(await api.logout())}>
+        <button className="icon-btn" title={L('Abmelden', 'Sign out')} onClick={async () => setAuth(await api.logout())}>
           <LogOut size={15} />
         </button>
       </div>

@@ -1,38 +1,38 @@
 # ♞ GPT-Schach
 
-**Schach-Training mit KI-Coach – lokal auf deinem Rechner, mit deinem eigenen ChatGPT-Abo.**
-Bots mit Persönlichkeit, ein Coach, der jeden Zug erklärt, unbegrenzt Taktikaufgaben, Lektionen, Eröffnungstrainer, Partie-Analyse, Bullet-Training und Statistiken – ohne weiteres Abo, ohne Konto bei einer Schachseite.
+**Chess training with an AI coach – running locally on your machine, powered by your own ChatGPT subscription.**
+Bots with personalities, a coach that explains every move, unlimited tactics puzzles, lessons, an opening trainer, game review, bullet training and stats – no extra subscription, no chess-site account.
 
-![GPT-Schach – Bots mit Kronen](docs/screenshot-bots.png)
+The app is available in **English and German** (switch at the bottom left).
 
-> 🇬🇧 *A local chess trainer in the style of the big chess sites: bots with personalities, a coach that explains every move (powered by your own ChatGPT subscription via “Sign in with ChatGPT”), unlimited puzzles, lessons, opening trainer, game review, bullet training and stats. UI is in German.*
+![GPT-Schach – bots with crowns](docs/screenshot-bots.png)
 
 ---
 
-## Funktionen
+## Features
 
-| Bereich | Was du bekommst |
+| Area | What you get |
 |---|---|
-| **Coach** | Spielt auf deinem Niveau, bewertet jeden Zug (Bester Zug … Patzer), erklärt Ideen in Worten, Hinweise in 3 Stufen, Zurücknehmen/Wiederholen, Varianten zum Durchklicken |
-| **Bots** | 20 Bots von 250 bis 3200 mit eigenen Spielstilen (Angreifer, Tauscherin, Nachmacher, Gambitspieler …) und **Kronen** zum Freispielen |
-| **Erkunden** | Mitten in der Partie frei für beide Seiten ziehen und live sehen, wie Stockfish die Stellung bewertet |
-| **Bullet** | Partien mit Schachuhr (30 s – 3+0) und Premoves, **Puzzle Rush**, Auswertung deiner Bedenkzeit |
-| **Puzzles** | Unbegrenzte Taktikaufgaben aus der offenen Lichess-Datenbank, Tagesrätsel, eigenes Puzzle-Rating, Themenfilter |
-| **Lernen** | 30 Lektionen (Taktik, Mattbilder, Angriff, Endspiele), 16 Eröffnungen zum Üben, Endspieltechnik gegen Stockfish |
-| **Analyse** | Jede Partie wird gespeichert: Genauigkeit, Fehler, Bewertungsgraph, Zeitverbrauch, Besprechung durch den Coach; freies Analysebrett mit FEN/PGN |
-| **Statistik** | Spielstärke, Puzzle-Rating, Bullet-Wertung, Siegquote früher vs. jetzt, Stärken und Schwächen |
+| **Coach** | Plays at your level, rates every move (best move … blunder), explains ideas in plain words, hints in 3 steps, take back/redo, clickable variations |
+| **Bots** | 20 bots from 250 to 3200 with their own playing styles (attacker, trader, copycat, gambiteer …) and **crowns** to earn |
+| **Explore** | In the middle of a game, move both sides freely and watch Stockfish evaluate the position live |
+| **Bullet** | Games with a clock (30 s – 3+0) and premoves, **Puzzle Rush**, review of your thinking time |
+| **Puzzles** | Unlimited tactics puzzles from the open Lichess database, daily puzzle, your own puzzle rating, theme filter |
+| **Learn** | 30 lessons (tactics, mating patterns, attack, endgames), 16 openings to practice, endgame technique against Stockfish |
+| **Analysis** | Every game is saved: accuracy, mistakes, evaluation graph, time usage, review by the coach; free analysis board with FEN/PGN |
+| **Stats** | Rating, puzzle rating, bullet rating, win rate then vs. now, strengths and weaknesses |
 
-Die Schach-Engine (Stockfish 17.1) läuft direkt im Browser. Der Coach nutzt dein ChatGPT-Konto – ohne Anmeldung funktioniert alles außer den Text-Erklärungen.
+The chess engine (Stockfish 17.1) runs right in your browser. The coach uses your ChatGPT account – without signing in, everything works except the written explanations.
 
 ## Screenshots
 
-| Puzzles | Lernen | Bullet |
+| Puzzles | Learn | Bullet |
 |---|---|---|
-| ![Puzzles](docs/screenshot-puzzles.png) | ![Lernen](docs/screenshot-learn.png) | ![Bullet](docs/screenshot-bullet.png) |
+| ![Puzzles](docs/screenshot-puzzles.png) | ![Learn](docs/screenshot-learn.png) | ![Bullet](docs/screenshot-bullet.png) |
 
 ## Installation
 
-Du brauchst **[Node.js](https://nodejs.org) ab Version 20** (einfach die LTS-Version installieren) und **[Git](https://git-scm.com)** – oder lade das Repo als ZIP herunter (grüner Knopf „Code“ → „Download ZIP“) und entpacke es.
+You need **[Node.js](https://nodejs.org) 20 or newer** (just install the LTS version) and **[Git](https://git-scm.com)** – or download the repo as a ZIP (green "Code" button → "Download ZIP") and unpack it.
 
 ```bash
 git clone https://github.com/Dolcruz/gpt-schach.git
@@ -41,72 +41,80 @@ npm install
 npm start
 ```
 
-Der Browser öffnet sich automatisch unter **http://gpt-schach.localhost:8080**. Beim ersten Start wird die App einmal gebaut (ein paar Sekunden). Beenden mit `Strg + C`.
+Your browser opens automatically at **http://gpt-schach.localhost:8080**. On first start the app is built once (a few seconds). Stop it with `Ctrl + C`.
 
-### Windows: Desktop-Symbol
+### Windows: desktop icon
 
 ```bash
 npm run shortcut
 ```
 
-Legt „GPT-Schach“ auf dem Desktop und im Startmenü an. Ein Doppelklick startet alles unsichtbar im Hintergrund und öffnet **http://gpt-schach.localhost**. Beenden: `stop.vbs` im Ordner doppelklicken.
+Creates "GPT-Schach" on your desktop and in the Start menu. A double-click starts everything invisibly in the background and opens **http://gpt-schach.localhost**. To stop it, double-click `stop.vbs` in the folder.
 
-### Aktualisieren
+### Updating
 
 ```bash
 git pull
 npm install
 ```
 
-Beim nächsten Start wird automatisch neu gebaut. Deine Partien und Fortschritte bleiben erhalten.
+The app is rebuilt automatically on the next start. Your games and progress are kept.
 
-## Mit ChatGPT anmelden
+## Sign in with ChatGPT
 
-Links unten auf **„Mit ChatGPT anmelden“** klicken und im Fenster mit deinem ChatGPT-Konto einloggen (gleicher Login wie bei der Codex CLI). Danach wählst du das Coach-Modell und den Denkaufwand.
+Click **"Sign in with ChatGPT"** at the bottom left and log in with your ChatGPT account in the popup (same login as the Codex CLI). Then pick the coach model and the reasoning effort.
 
-- Benötigt ein ChatGPT-Abo, mit dem du Codex nutzen kannst (z. B. Plus oder Pro).
-- Nutzt du bereits die **Codex CLI oder die Codex-App**, reicht ein Klick auf **„Codex-Login übernehmen“**.
-- Für den Login wird kurz der Port `1455` auf deinem Rechner benutzt (wie bei Codex) – nicht gleichzeitig mit einem Codex-Login starten.
+- Requires a ChatGPT plan that includes Codex (e.g. Plus or Pro).
+- If you already use the **Codex CLI or the Codex app**, a click on **"Use Codex login"** is enough.
+- The login briefly uses port `1455` on your machine (like Codex) – don't run it at the same time as a Codex login.
 
-## Wo liegen meine Daten?
+## Where is my data?
 
-Alles bleibt auf deinem Rechner im Ordner `data/`:
-- `data/auth.json` – deine Anmelde-Tokens (verlassen deinen Rechner nur in Richtung OpenAI)
-- `data/store.json` – Partien, Puzzles, Lernfortschritt
+Everything stays on your machine in the `data/` folder:
+- `data/auth.json` – your login tokens (only ever sent to OpenAI)
+- `data/store.json` – games, puzzles, learning progress
 
-Der Server lauscht nur auf `localhost` und ist von anderen Geräten nicht erreichbar.
+The server only listens on `localhost` and can't be reached from other devices.
 
-## Häufige Fragen
+## FAQ
 
-**Die Seite öffnet sich nicht?** `*.localhost`-Adressen funktionieren in Chrome, Edge und Firefox automatisch. Alternativ `http://localhost:8080` öffnen.
+**The page doesn't open?** `*.localhost` addresses work automatically in Chrome, Edge and Firefox. Alternatively open `http://localhost:8080`.
 
-**Port belegt?** Anderen Port wählen: `PORT=9000 npm start` (Windows PowerShell: `$env:PORT=9000; npm start`).
+**Port in use?** Choose another port: `PORT=9000 npm start` (Windows PowerShell: `$env:PORT=9000; npm start`).
 
-**Die Modell-Liste ist leer?** Die verfügbaren Modelle hängen von der gemeldeten Codex-Version ab: `CODEX_CLIENT_VERSION=<aktuelle Codex-Version> npm start`.
+**The model list is empty?** The available models depend on the reported Codex version: `CODEX_CLIENT_VERSION=<current Codex version> npm start`.
 
-**Wie stark ist die Engine?** Stockfish 17.1 (WASM). Der Coach rechnet mit Tiefe 18, die Partie-Analyse mit Tiefe 16, die Live-Analyse bis Tiefe 24 – für Spieler bis weit über 2000 Elo verlässlich.
+**How strong is the engine?** Stockfish 17.1 (WASM). The coach searches at depth 18, game review at depth 16, live analysis up to depth 24 – reliable for players well above 2000 Elo.
 
-## Entwicklung
+## Development
 
 ```bash
-npm run dev      # Server auf :3001 + Vite auf :5173 mit Hot Reload
-npm run build    # Typprüfung + Produktions-Build nach dist/
+npm run dev      # server on :3001 + Vite on :5173 with hot reload
+npm run build    # type check + production build into dist/
 ```
 
-Aufbau: `src/` (React-Frontend), `server/` (Login, Coach-Proxy, Datenspeicher, Puzzle-Proxy), `public/engine/` (Stockfish).
+Structure: `src/` (React frontend), `server/` (login, coach proxy, data store, puzzle proxy), `public/engine/` (Stockfish). Texts live inline as `L('Deutsch', 'English')` (see `src/i18n.ts`).
 
-## Hinweise
+## Notes
 
-- **Inoffizielles Hobbyprojekt.** Nicht verbunden mit OpenAI, Lichess oder chess.com. Die Anmeldung nutzt denselben Weg wie die offizielle Codex CLI; OpenAI kann diesen jederzeit ändern. Nutzung auf eigene Verantwortung und im Rahmen der Nutzungsbedingungen deines ChatGPT-Abos.
-- Die Puzzles stammen aus der [Lichess-Puzzle-Datenbank](https://database.lichess.org/#puzzles) (CC0) und werden über die öffentliche Lichess-API geladen.
+- **Unofficial hobby project.** Not affiliated with OpenAI, Lichess or chess.com. Signing in uses the same route as the official Codex CLI; OpenAI may change it at any time. Use at your own risk and within the terms of your ChatGPT plan.
+- Puzzles come from the [Lichess puzzle database](https://database.lichess.org/#puzzles) (CC0) and are loaded via the public Lichess API.
 
-## Lizenz & Danksagung
+## License & credits
 
-GPT-Schach steht unter der **GNU GPL v3** (siehe [LICENSE](LICENSE)).
+GPT-Schach is licensed under the **GNU GPL v3** (see [LICENSE](LICENSE)).
 
 - [Stockfish](https://stockfishchess.org) & [stockfish.js](https://github.com/nmrugg/stockfish.js) – GPL-3.0
-- [chessground](https://github.com/lichess-org/chessground) (Brett & cburnett-Figuren) – GPL-3.0
+- [chessground](https://github.com/lichess-org/chessground) (board & cburnett pieces) – GPL-3.0
 - [chess.js](https://github.com/jhlywa/chess.js) – BSD-2-Clause
-- [DiceBear](https://www.dicebear.com) (Avatare, Stile „Avataaars“ von Pablo Stanley und „Bottts“ von Pablo Stanley) – siehe dortige Lizenzen
-- [Lucide](https://lucide.dev) Icons – ISC
+- [DiceBear](https://www.dicebear.com) (avatars, styles "Avataaars" and "Bottts" by Pablo Stanley) – see their licenses
+- [Lucide](https://lucide.dev) icons – ISC
 - Puzzles: [Lichess](https://lichess.org) – CC0
+
+---
+
+## 🇩🇪 Kurz auf Deutsch
+
+Lokale Schach-App mit KI-Coach über dein eigenes ChatGPT-Abo: Bots mit Kronen, Puzzles, Lektionen, Eröffnungstrainer, Analyse, Bullet und Statistik. Die App ist komplett auf Deutsch und Englisch verfügbar (Umschalter links unten).
+
+**Installation:** Node.js ab Version 20 installieren, dann `git clone https://github.com/Dolcruz/gpt-schach.git`, `cd gpt-schach`, `npm install`, `npm start`. Unter Windows legt `npm run shortcut` ein Desktop-Symbol an. Links unten mit ChatGPT anmelden – fertig. Alle Daten bleiben lokal im Ordner `data/`.

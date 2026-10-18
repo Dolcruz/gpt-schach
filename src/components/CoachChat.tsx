@@ -1,3 +1,4 @@
+import { L } from '../i18n';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { SendHorizontal } from 'lucide-react';
 import { streamCoach, type ChatMsg } from '../api';
@@ -43,7 +44,7 @@ interface Props {
 let nextId = 0;
 
 export const CoachChat = forwardRef<CoachChatHandle, Props>(function CoachChat(
-  { loggedIn, settings, context, level = 1200, intro, placeholder = 'Frag den Coach …', quick, onArrows, fens, vv },
+  { loggedIn, settings, context, level = 1200, intro, placeholder = L('Frag den Coach …', 'Ask the coach …'), quick, onArrows, fens, vv },
   ref,
 ) {
   const [msgs, setMsgs] = useState<Msg[]>(() => (intro ? [{ id: ++nextId, from: 'coach', text: intro }] : []));
@@ -64,7 +65,7 @@ export const CoachChat = forwardRef<CoachChatHandle, Props>(function CoachChat(
   const ask = useCallback(async (prompt: string, shown?: string) => {
     if (shown) setMsgs((ms) => [...ms, { id: ++nextId, from: 'user', text: shown }]);
     if (!live.current.loggedIn) {
-      setMsgs((ms) => [...ms, { id: ++nextId, from: 'coach', text: 'Melde dich links unten mit ChatGPT an, dann erkläre ich dir alles im Detail.', error: true }]);
+      setMsgs((ms) => [...ms, { id: ++nextId, from: 'coach', text: L('Melde dich links unten mit ChatGPT an, dann erkläre ich dir alles im Detail.', "Sign in with ChatGPT at the bottom left and I'll explain everything in detail."), error: true }]);
       return;
     }
     const id = ++nextId;
@@ -91,12 +92,12 @@ export const CoachChat = forwardRef<CoachChatHandle, Props>(function CoachChat(
       );
       const { text, arrows, lines } = extractMarkers(full);
       const candidates = live.current.fens?.() ?? [];
-      const variations = lines.map((l, i) => resolveVariation(l, candidates, lines.length > 1 ? `Coach-Variante ${i + 1}` : 'Coach-Variante')).filter((v): v is Variation => !!v);
+      const variations = lines.map((l, i) => resolveVariation(l, candidates, lines.length > 1 ? `${L('Coach-Variante', 'Coach line')} ${i + 1}` : L('Coach-Variante', 'Coach line'))).filter((v): v is Variation => !!v);
       patch(id, { text, streaming: false, variations });
       if (arrows.length) live.current.onArrows?.(arrows);
     } catch (e: any) {
       if (e.name === 'AbortError') setMsgs((ms) => ms.filter((m) => m.id !== id || m.text));
-      else patch(id, { text: `Coach nicht erreichbar: ${e.message}`, streaming: false, error: true });
+      else patch(id, { text: `${L('Coach nicht erreichbar', 'Coach unavailable')}: ${e.message}`, streaming: false, error: true });
     } finally {
       setBusy(false);
     }
@@ -119,7 +120,7 @@ export const CoachChat = forwardRef<CoachChatHandle, Props>(function CoachChat(
     const q = input.trim();
     if (!q || busy) return;
     setInput('');
-    ask(`Frage des Schülers: ${q}`, q);
+    ask(`${L('Frage des Schülers', "Student's question")}: ${q}`, q);
   }
 
   return (
@@ -163,8 +164,8 @@ export const CoachChat = forwardRef<CoachChatHandle, Props>(function CoachChat(
           send();
         }}
       >
-        <input value={input} onChange={(e) => setInput(e.target.value)} placeholder={loggedIn ? placeholder : 'Anmelden, um Fragen zu stellen'} disabled={!loggedIn} />
-        <button className="send" disabled={busy || !input.trim()} title="Senden">
+        <input value={input} onChange={(e) => setInput(e.target.value)} placeholder={loggedIn ? placeholder : L('Anmelden, um Fragen zu stellen', 'Sign in to ask questions')} disabled={!loggedIn} />
+        <button className="send" disabled={busy || !input.trim()} title={L('Senden', 'Send')}>
           <SendHorizontal size={18} />
         </button>
       </form>

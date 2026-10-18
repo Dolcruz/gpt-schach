@@ -1,3 +1,4 @@
+import { L } from '../i18n';
 import { ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, Compass, X } from 'lucide-react';
 import { CLASS_INFO, pvToSan } from '../coach';
 import { formatScore, type EngineLine } from '../engine';
@@ -19,28 +20,28 @@ export function ExploreBar({ ex, onClose }: { ex: ExploreView; onClose: () => vo
         <Compass size={18} />
       </span>
       <div className="var-info">
-        <b>Erkunden – beide Seiten frei</b>
-        <span>{cur ? `${moveLabel(ex.startFen, ex.idx - 1, true)} ${cur.san} – ${cur.color === 'w' ? 'Weiß' : 'Schwarz'}: ${sanToWords(cur.san)}` : 'Ausgangsstellung – zieh einfach eine Figur'}</span>
+        <b>{L('Erkunden – beide Seiten frei', 'Explore – move both sides')}</b>
+        <span>{cur ? `${moveLabel(ex.startFen, ex.idx - 1, true)} ${cur.san} – ${cur.color === 'w' ? L('Weiß', 'White') : L('Schwarz', 'Black')}: ${sanToWords(cur.san)}` : L('Ausgangsstellung – zieh einfach eine Figur', 'Starting position – just move a piece')}</span>
       </div>
       <div className="var-nav">
-        <button onClick={() => ex.go(0)} disabled={ex.idx === 0} title="Zur Ausgangsstellung">
+        <button onClick={() => ex.go(0)} disabled={ex.idx === 0} title={L('Zur Ausgangsstellung', 'To the starting position')}>
           <ChevronFirst size={17} />
         </button>
-        <button onClick={() => ex.go(ex.idx - 1)} disabled={ex.idx === 0} title="Zurück (←)">
+        <button onClick={() => ex.go(ex.idx - 1)} disabled={ex.idx === 0} title={L('Zurück (←)', 'Back (←)')}>
           <ChevronLeft size={17} />
         </button>
         <span className="var-count">
           {ex.idx}/{n}
         </span>
-        <button onClick={() => ex.go(ex.idx + 1)} disabled={ex.idx >= n} title="Vor (→)">
+        <button onClick={() => ex.go(ex.idx + 1)} disabled={ex.idx >= n} title={L('Vor (→)', 'Forward (→)')}>
           <ChevronRight size={17} />
         </button>
-        <button onClick={() => ex.go(n)} disabled={ex.idx >= n} title="Ende">
+        <button onClick={() => ex.go(n)} disabled={ex.idx >= n} title={L('Ende', 'End')}>
           <ChevronLast size={17} />
         </button>
       </div>
-      <button className="var-close" onClick={onClose} title="Erkunden beenden">
-        <X size={15} /> Zur Partie
+      <button className="var-close" onClick={onClose} title={L('Erkunden beenden', 'Stop exploring')}>
+        <X size={15} /> {L('Zur Partie', 'Back to game')}
       </button>
     </div>
   );
@@ -65,8 +66,8 @@ export function ExplorePanel({ ex, lines, top, lastClass }: { ex: ExploreView; l
       <div className="xp-head">
         <span className="xp-eval">{evalText}</span>
         <div className="xp-sub">
-          <b>Stockfish-Bewertung</b>
-          <span>{lines[0] ? `Tiefe ${lines[0].depth} · Sicht Weiß` : 'rechnet …'}</span>
+          <b>{L('Stockfish-Bewertung', 'Stockfish evaluation')}</b>
+          <span>{lines[0] ? L(`Tiefe ${lines[0].depth} · Sicht Weiß`, `Depth ${lines[0].depth} · White's view`) : L('rechnet …', 'thinking …')}</span>
         </div>
       </div>
       {lastClass && ex.current && (
@@ -82,7 +83,7 @@ export function ExplorePanel({ ex, lines, top, lastClass }: { ex: ExploreView; l
       )}
       {ex.current && !lastClass && (
         <div className="xp-last muted-text">
-          <span className="dot-wait" /> {ex.current.san} wird bewertet …
+          <span className="dot-wait" /> {ex.current.san} {L('wird bewertet …', 'is being evaluated …')}
         </div>
       )}
       <div className="xp-lines">
@@ -90,10 +91,10 @@ export function ExplorePanel({ ex, lines, top, lastClass }: { ex: ExploreView; l
           const sc = l.mate !== null ? `#${l.mate * sign}` : `${l.score * sign > 0 ? '+' : ''}${((l.score * sign) / 100).toFixed(2)}`;
           return (
             <div key={i} className="engine-line">
-              <button className={`pill ${l.score * sign >= 0 ? 'w' : 'b'}`} onClick={() => takeLine(l.pv.slice(0, 1))} title="Diesen Zug spielen">
+              <button className={`pill ${l.score * sign >= 0 ? 'w' : 'b'}`} onClick={() => takeLine(l.pv.slice(0, 1))} title={L('Diesen Zug spielen', 'Play this move')}>
                 {sc}
               </button>
-              <button className="pv" onClick={() => takeLine(l.pv)} title="Fortsetzung übernehmen und mit ▶ durchgehen">
+              <button className="pv" onClick={() => takeLine(l.pv)} title={L('Fortsetzung übernehmen und mit ▶ durchgehen', 'Take this line and step through it with ▶')}>
                 {pvToSan(fen, l.pv, 8).join(' ')}
               </button>
             </div>
@@ -101,8 +102,8 @@ export function ExplorePanel({ ex, lines, top, lastClass }: { ex: ExploreView; l
         })}
       </div>
       <div className="xp-moves">
-        <span className="xp-label">Erkundet:</span>
-        {ex.sans.length === 0 && <span className="muted-text">noch keine Züge – zieh für beide Seiten</span>}
+        <span className="xp-label">{L('Erkundet:', 'Explored:')}</span>
+        {ex.sans.length === 0 && <span className="muted-text">{L('noch keine Züge – zieh für beide Seiten', 'no moves yet – move for both sides')}</span>}
         {ex.sans.map((san, i) => (
           <button key={i} className={`xp-move ${i === ex.idx - 1 ? 'on' : ''}`} onClick={() => ex.go(i + 1)} title={sanToWords(san)}>
             {moveLabel(ex.startFen!, i) && <i>{moveLabel(ex.startFen!, i)}</i>}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Bot, CalendarDays, GraduationCap, History, Microscope, Puzzle, TrendingUp, Zap } from 'lucide-react';
+import { BookOpen, Bot, CalendarDays, GraduationCap, History, Languages, Microscope, Puzzle, TrendingUp, Zap } from 'lucide-react';
 import { api, type AuthInfo } from './api';
 import { AccountBar, type CoachSettings } from './components/AccountBar';
 import { Home, type GameSetup } from './components/Home';
@@ -13,6 +13,7 @@ import { Stats } from './pages/Stats';
 import { Bullet } from './pages/Bullet';
 import { Rush } from './pages/Rush';
 import { useRoute, navigate } from './router';
+import { L, lang, setLang } from './i18n';
 
 function loadSettings(): CoachSettings {
   try {
@@ -29,11 +30,11 @@ const NAV = [
   { route: 'bots', label: 'Bots', icon: Bot },
   { route: 'bullet', label: 'Bullet', icon: Zap },
   { route: 'puzzles', label: 'Puzzles', icon: Puzzle },
-  { route: 'daily', label: 'Tagesrätsel', icon: CalendarDays },
-  { route: 'learn', label: 'Lernen', icon: BookOpen },
-  { route: 'analysis', label: 'Analyse', icon: Microscope },
-  { route: 'games', label: 'Partien', icon: History },
-  { route: 'stats', label: 'Statistik', icon: TrendingUp },
+  { route: 'daily', label: L('Tagesrätsel', 'Daily puzzle'), icon: CalendarDays },
+  { route: 'learn', label: L('Lernen', 'Learn'), icon: BookOpen },
+  { route: 'analysis', label: L('Analyse', 'Analysis'), icon: Microscope },
+  { route: 'games', label: L('Partien', 'Games'), icon: History },
+  { route: 'stats', label: L('Statistik', 'Stats'), icon: TrendingUp },
 ] as const;
 
 export interface PageProps {
@@ -104,6 +105,14 @@ export function App() {
           ))}
         </nav>
         <AccountBar auth={auth} setAuth={setAuth} settings={settings} setSettings={setSettings} />
+        <div className="lang-switch" title={L('Sprache', 'Language')}>
+          <Languages size={14} />
+          {(['de', 'en'] as const).map((l) => (
+            <button key={l} className={lang === l ? 'on' : ''} onClick={() => lang !== l && setLang(l)}>
+              {l.toUpperCase()}
+            </button>
+          ))}
+        </div>
       </aside>
       <main>{content}</main>
     </div>

@@ -1,6 +1,7 @@
+import { L } from '../i18n';
 import { useEffect, useMemo, useState } from 'react';
 import { Bot as BotIcon, ChevronDown, Crown, Target as TargetIcon, GraduationCap, Lightbulb, MessageSquareText, RotateCcw, Target } from 'lucide-react';
-import { BOTS, COACH_BOT, coachOpponent, type Bot, type Category } from '../bots';
+import { BOTS, COACH_BOT, categoryLabel, coachOpponent, type Bot, type Category } from '../bots';
 import { Board } from './Board';
 import { Avatar, Piece, PlayerBar } from './ui';
 import type { Mode } from '../App';
@@ -37,7 +38,7 @@ const CATEGORIES: { id: Category; hint: string }[] = [
 ];
 
 function levelName(r: number) {
-  return r < 800 ? 'Anfänger' : r < 1400 ? 'Fortgeschritten' : r < 1900 ? 'Erfahren' : 'Meister';
+  return categoryLabel(r < 800 ? 'Anfänger' : r < 1400 ? 'Fortgeschritten' : r < 1900 ? 'Erfahren' : 'Meister');
 }
 
 export function Home({ mode, loggedIn, onStart }: Props) {
@@ -77,19 +78,19 @@ export function Home({ mode, loggedIn, onStart }: Props) {
         <div className="board-wrap">
           <Board fen={START} orientation={color === 'b' ? 'black' : 'white'} movable={null} onMove={() => {}} viewOnly />
         </div>
-        <PlayerBar avatar="you" name="Du" />
+        <PlayerBar avatar="you" name={L('Du', 'You')} />
       </div>
 
       <section className="panel">
         <header className="panel-head">
           {isCoach ? <GraduationCap size={22} /> : <BotIcon size={22} />}
-          <h1>{isCoach ? 'Mit Coach spielen' : 'Gegen Bots spielen'}</h1>
+          <h1>{isCoach ? L('Mit Coach spielen', 'Play with Coach') : L('Gegen Bots spielen', 'Play Bots')}</h1>
         </header>
 
         <div className="panel-body">
           <div className="hero">
             <Avatar id={shown.id} size={92} className="hero-avatar" />
-            <div className="speech">{isCoach ? 'Ich spiele auf deinem Niveau und erkläre dir jeden Zug. Bereit?' : bot.lines.greet?.[0]}</div>
+            <div className="speech">{isCoach ? L('Ich spiele auf deinem Niveau und erkläre dir jeden Zug. Bereit?', "I'll play at your level and explain every move. Ready?") : bot.lines.greet?.[0]}</div>
           </div>
           <div className="hero-name">
             <b>{shown.name}</b>
@@ -102,7 +103,7 @@ export function Home({ mode, loggedIn, onStart }: Props) {
             <>
               <div className="level">
                 <div className="level-head">
-                  <span>Spielstärke</span>
+                  <span>{L('Spielstärke', 'Strength')}</span>
                   <b>{coachLevel}</b>
                 </div>
                 <input
@@ -115,25 +116,25 @@ export function Home({ mode, loggedIn, onStart }: Props) {
                   style={{ ['--p' as any]: `${((coachLevel - 400) / 2000) * 100}%` }}
                 />
                 <div className="level-scale">
-                  <span>Anfänger</span>
-                  <span>Meister</span>
+                  <span>{categoryLabel('Anfänger')}</span>
+                  <span>{categoryLabel('Meister')}</span>
                 </div>
               </div>
               <ul className="features">
                 <li>
-                  <Target size={18} /> Bewertet jeden Zug – vom besten Zug bis zum Patzer
+                  <Target size={18} /> {L('Bewertet jeden Zug – vom besten Zug bis zum Patzer', 'Rates every move – from best move to blunder')}
                 </li>
                 <li>
-                  <MessageSquareText size={18} /> Erklärt Ideen, Drohungen und Pläne in Worten
+                  <MessageSquareText size={18} /> {L('Erklärt Ideen, Drohungen und Pläne in Worten', 'Explains ideas, threats and plans in plain words')}
                 </li>
                 <li>
-                  <Lightbulb size={18} /> Hinweise in drei Stufen, wenn du feststeckst
+                  <Lightbulb size={18} /> {L('Hinweise in drei Stufen, wenn du feststeckst', "Hints in three steps when you're stuck")}
                 </li>
                 <li>
-                  <RotateCcw size={18} /> Fehler zurücknehmen und nochmal versuchen
+                  <RotateCcw size={18} /> {L('Fehler zurücknehmen und nochmal versuchen', 'Take back mistakes and try again')}
                 </li>
               </ul>
-              {!loggedIn && <p className="note">Ohne Anmeldung zeigt der Coach nur Engine-Bewertungen. Melde dich links unten mit ChatGPT an.</p>}
+              {!loggedIn && <p className="note">{L('Ohne Anmeldung zeigt der Coach nur Engine-Bewertungen. Melde dich links unten mit ChatGPT an.', 'Without signing in, the coach only shows engine ratings. Sign in with ChatGPT at the bottom left.')}</p>}
             </>
           ) : (
             <div className="categories">
@@ -141,10 +142,10 @@ export function Home({ mode, loggedIn, onStart }: Props) {
                 <div className="cp-top">
                   <Crown size={20} />
                   <b>
-                    {crowns.earned} / {crowns.total} Kronen
+                    {crowns.earned} / {crowns.total} {L('Kronen', 'crowns')}
                   </b>
                   <span>
-                    {crowns.beaten} von {BOTS.length} Bots besiegt
+                    {L(`${crowns.beaten} von ${BOTS.length} Bots besiegt`, `${crowns.beaten} of ${BOTS.length} bots defeated`)}
                   </span>
                 </div>
                 <div className="progress">
@@ -152,13 +153,13 @@ export function Home({ mode, loggedIn, onStart }: Props) {
                 </div>
                 {crowns.next ? (
                   <button className="next-opponent" onClick={() => pick(crowns.next!)}>
-                    <TargetIcon size={15} /> Nächster Gegner:
+                    <TargetIcon size={15} /> {L('Nächster Gegner:', 'Next opponent:')}
                     <Avatar id={crowns.next.id} size={22} />
                     <b>{crowns.next.name}</b>
                     <span className="rating">{crowns.next.rating}</span>
                   </button>
                 ) : (
-                  <span className="next-opponent done">Alle Bots besiegt – jetzt alle Kronen holen!</span>
+                  <span className="next-opponent done">{L('Alle Bots besiegt – jetzt alle Kronen holen!', 'All bots defeated – now collect every crown!')}</span>
                 )}
               </div>
               {CATEGORIES.map((cat) => {
@@ -172,9 +173,9 @@ export function Home({ mode, loggedIn, onStart }: Props) {
                           <Avatar key={b.id} id={b.id} size={28} />
                         ))}
                       </div>
-                      <span className="category-name">{cat.id}</span>
+                      <span className="category-name">{categoryLabel(cat.id)}</span>
                       <span className="category-meta">
-                        {bots.filter((b) => crowns.per.get(b.id)?.has('win')).length}/{bots.length} besiegt · {cat.hint}
+                        {bots.filter((b) => crowns.per.get(b.id)?.has('win')).length}/{bots.length} {L('besiegt', 'defeated')} · {cat.hint}
                       </span>
                       <ChevronDown size={18} className="chev" />
                     </button>
@@ -200,10 +201,10 @@ export function Home({ mode, loggedIn, onStart }: Props) {
 
         <footer className="panel-foot">
           <div className="foot-row">
-            <span className="foot-label">Ich spiele</span>
+            <span className="foot-label">{L('Ich spiele', 'I play')}</span>
             <div className="seg">
               {(['w', 'r', 'b'] as const).map((c) => (
-                <button key={c} className={color === c ? 'on' : ''} onClick={() => setColor(c)} title={c === 'w' ? 'Weiß' : c === 'b' ? 'Schwarz' : 'Zufällig'}>
+                <button key={c} className={color === c ? 'on' : ''} onClick={() => setColor(c)} title={c === 'w' ? L('Weiß', 'White') : c === 'b' ? L('Schwarz', 'Black') : L('Zufällig', 'Random')}>
                   {c === 'r' ? (
                     <span className="random-king">
                       <Piece type="k" color="w" size={26} />
@@ -218,12 +219,12 @@ export function Home({ mode, loggedIn, onStart }: Props) {
           </div>
           {!isCoach && (
             <label className="switch-row">
-              <span>Coach schaut zu</span>
+              <span>{L('Coach schaut zu', 'Coach watches')}</span>
               <input type="checkbox" className="switch" checked={coachWithBot} onChange={(e) => setCoachWithBot(e.target.checked)} />
             </label>
           )}
           <button className="btn primary xl" onClick={start}>
-            Spielen
+            {L('Spielen', 'Play')}
           </button>
         </footer>
       </section>
@@ -235,7 +236,7 @@ export function Home({ mode, loggedIn, onStart }: Props) {
 function TileCrowns({ have }: { have: Set<CrownId> }) {
   if (!have.size) return null;
   return (
-    <span className="tile-crowns" title={`${have.size} von ${CROWNS.length} Kronen`}>
+    <span className="tile-crowns" title={L(`${have.size} von ${CROWNS.length} Kronen`, `${have.size} of ${CROWNS.length} crowns`)}>
       {CROWNS.map((c) => (
         <Crown key={c.id} size={11} className={have.has(c.id) ? 'got' : ''} fill={have.has(c.id) ? 'currentColor' : 'none'} />
       ))}

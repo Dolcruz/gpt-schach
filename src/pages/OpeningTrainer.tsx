@@ -1,3 +1,4 @@
+import { L } from '../i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Chess } from 'chess.js';
 import type { Key } from 'chessground/types';
@@ -168,12 +169,12 @@ export function OpeningTrainer({ opening, loggedIn, settings, onPractice }: Page
 
   const context = () =>
     positionBlock(fen, [
-      `Eröffnung: ${opening.name} (${opening.eco}). Der Schüler übt die Seite ${opening.side === 'w' ? 'Weiß' : 'Schwarz'}.`,
-      `Grundidee: ${opening.idea}`,
-      `Hauptvariante (Theorie): ${opening.moves.map((m, i) => (i % 2 === 0 ? `${i / 2 + 1}.${m}` : m)).join(' ')}`,
-      `Bisher gespielt: ${opening.moves.slice(0, ply).join(' ') || '(noch nichts)'}`,
-      !done ? `Nächster Theoriezug: ${opening.moves[ply]}` : 'Die Linie ist komplett gespielt.',
-      wrong ? `Der Schüler hat eben ${wrong} versucht – das ist nicht die Hauptvariante.` : '',
+      L(`Eröffnung: ${opening.name} (${opening.eco}). Der Schüler übt die Seite ${opening.side === 'w' ? 'Weiß' : 'Schwarz'}.`, `Opening: ${opening.name} (${opening.eco}). The student practices the ${opening.side === 'w' ? 'White' : 'Black'} side.`),
+      L(`Grundidee: ${opening.idea}`, `Main idea: ${opening.idea}`),
+      `${L('Hauptvariante (Theorie)', 'Main line (theory)')}: ${opening.moves.map((m, i) => (i % 2 === 0 ? `${i / 2 + 1}.${m}` : m)).join(' ')}`,
+      L(`Bisher gespielt: ${opening.moves.slice(0, ply).join(' ') || '(noch nichts)'}`, `Played so far: ${opening.moves.slice(0, ply).join(' ') || '(nothing yet)'}`),
+      !done ? L(`Nächster Theoriezug: ${opening.moves[ply]}`, `Next theory move: ${opening.moves[ply]}`) : L('Die Linie ist komplett gespielt.', 'The line has been played completely.'),
+      wrong ? L(`Der Schüler hat eben ${wrong} versucht – das ist nicht die Hauptvariante.`, `The student just tried ${wrong} – that is not the main line.`) : '',
     ]);
 
   const moveList = opening.moves.map((m, i) => ({ m, i })).filter(({ i }) => i < ply || (done && i < total));
@@ -199,7 +200,7 @@ export function OpeningTrainer({ opening, loggedIn, settings, onPractice }: Page
             </div>
             <div className="bar-sub">
               <span className="muted-text">
-                Zug {Math.min(Math.floor(ply / 2) + 1, Math.ceil(total / 2))} von {Math.ceil(total / 2)}
+                {L('Zug', 'Move')} {Math.min(Math.floor(ply / 2) + 1, Math.ceil(total / 2))} {L('von', 'of')} {Math.ceil(total / 2)}
               </span>
             </div>
           </div>
@@ -219,8 +220,8 @@ export function OpeningTrainer({ opening, loggedIn, settings, onPractice }: Page
           <Avatar id="you" size={40} />
           <div className="player-info">
             <div className="player-name">
-              <b>Du</b>
-              <span className="rating">· {opening.side === 'w' ? 'Weiß' : 'Schwarz'}</span>
+              <b>{L('Du', 'You')}</b>
+              <span className="rating">· {opening.side === 'w' ? L('Weiß', 'White') : L('Schwarz', 'Black')}</span>
             </div>
           </div>
         </div>
@@ -228,7 +229,7 @@ export function OpeningTrainer({ opening, loggedIn, settings, onPractice }: Page
 
       <section className="panel">
         <header className="panel-head">
-          <button className="head-back" onClick={() => navigate('learn')} title="Zurück zur Übersicht">
+          <button className="head-back" onClick={() => navigate('learn')} title={L('Zurück zur Übersicht', 'Back to overview')}>
             <ArrowLeft size={18} />
           </button>
           <Piece type="k" color={opening.side} size={22} />
@@ -237,10 +238,10 @@ export function OpeningTrainer({ opening, loggedIn, settings, onPractice }: Page
         <div className="panel-top">
           <div className="seg-tabs">
             <button className={mode === 'learn' ? 'on' : ''} onClick={() => restart('learn')}>
-              <GraduationCap size={15} /> Lernen
+              <GraduationCap size={15} /> {L('Lernen', 'Learn')}
             </button>
             <button className={mode === 'practice' ? 'on' : ''} onClick={() => restart('practice')}>
-              <Swords size={15} /> Üben
+              <Swords size={15} /> {L('Üben', 'Practice')}
             </button>
           </div>
           <p className="idea">{opening.idea}</p>
@@ -250,8 +251,8 @@ export function OpeningTrainer({ opening, loggedIn, settings, onPractice }: Page
                 <Check size={22} strokeWidth={3} />
               </span>
               <div>
-                <b>{mistakes === 0 ? 'Linie fehlerfrei gespielt!' : `Linie geschafft – ${mistakes} ${mistakes === 1 ? 'Fehler' : 'Fehler'}`}</b>
-                <span>{mode === 'learn' ? 'Jetzt im Üben-Modus ohne Pfeile probieren.' : progress ? `${progress.perfect}× fehlerfrei geübt` : ''}</span>
+                <b>{mistakes === 0 ? L('Linie fehlerfrei gespielt!', 'Line played without a mistake!') : L(`Linie geschafft – ${mistakes} Fehler`, `Line completed – ${mistakes} ${mistakes === 1 ? 'mistake' : 'mistakes'}`)}</b>
+                <span>{mode === 'learn' ? L('Jetzt im Üben-Modus ohne Pfeile probieren.', 'Now try it in practice mode without arrows.') : progress ? L(`${progress.perfect}× fehlerfrei geübt`, `${progress.perfect}× practiced perfectly`) : ''}</span>
               </div>
             </div>
           ) : wrong ? (
@@ -260,8 +261,8 @@ export function OpeningTrainer({ opening, loggedIn, settings, onPractice }: Page
                 <X size={22} strokeWidth={3} />
               </span>
               <div>
-                <b>{wrong} ist hier nicht die Theorie</b>
-                <span>{mode === 'learn' || reveal ? 'Der Pfeil zeigt den Hauptzug.' : 'Versuch es nochmal.'}</span>
+                <b>{L(`${wrong} ist hier nicht die Theorie`, `${wrong} is not the theory move here`)}</b>
+                <span>{mode === 'learn' || reveal ? L('Der Pfeil zeigt den Hauptzug.', 'The arrow shows the main move.') : L('Versuch es nochmal.', 'Try again.')}</span>
               </div>
             </div>
           ) : (
@@ -270,8 +271,8 @@ export function OpeningTrainer({ opening, loggedIn, settings, onPractice }: Page
                 <Piece type="k" color={opening.side} size={30} />
               </span>
               <div>
-                <b>{myTurn ? 'Dein Zug' : 'Gegner zieht …'}</b>
-                <span>{mode === 'learn' ? 'Folge dem grünen Pfeil und merk dir die Idee.' : 'Spiel die Hauptvariante aus dem Gedächtnis.'}</span>
+                <b>{myTurn ? L('Dein Zug', 'Your move') : L('Gegner zieht …', 'Opponent is moving …')}</b>
+                <span>{mode === 'learn' ? L('Folge dem grünen Pfeil und merk dir die Idee.', 'Follow the green arrow and remember the idea.') : L('Spiel die Hauptvariante aus dem Gedächtnis.', 'Play the main line from memory.')}</span>
               </div>
             </div>
           )}
@@ -285,11 +286,11 @@ export function OpeningTrainer({ opening, loggedIn, settings, onPractice }: Page
           </div>
           <div className="btn-row">
             <button className="btn" onClick={() => restart()}>
-              <RotateCcw size={15} /> Neu starten
+              <RotateCcw size={15} /> {L('Neu starten', 'Restart')}
             </button>
             {!done && mode === 'practice' && (
               <button className="btn" onClick={() => setReveal(true)} disabled={!myTurn}>
-                <Eye size={15} /> Zug zeigen
+                <Eye size={15} /> {L('Zug zeigen', 'Show move')}
               </button>
             )}
             {done && (
@@ -301,12 +302,12 @@ export function OpeningTrainer({ opening, loggedIn, settings, onPractice }: Page
                     color: opening.side,
                     coach: true,
                     startFen: fen,
-                    goal: `Wir spielen ab dem Ende der **${opening.name}** weiter. Setze die typischen Pläne um: ${opening.idea}`,
+                    goal: L(`Wir spielen ab dem Ende der **${opening.name}** weiter. Setze die typischen Pläne um: ${opening.idea}`, `We continue from the end of the **${opening.name}**. Carry out the typical plans: ${opening.idea}`),
                     backTo: `learn/opening:${opening.id}`,
                   })
                 }
               >
-                <Swords size={15} /> Weiterspielen
+                <Swords size={15} /> {L('Weiterspielen', 'Play on')}
               </button>
             )}
           </div>
@@ -318,11 +319,11 @@ export function OpeningTrainer({ opening, loggedIn, settings, onPractice }: Page
           settings={settings}
           context={context}
           onArrows={setArrows}
-          intro={`Wir üben die **${opening.name}** mit ${opening.side === 'w' ? 'Weiß' : 'Schwarz'}. Frag mich zu jedem Zug, warum er gespielt wird.`}
+          intro={L(`Wir üben die **${opening.name}** mit ${opening.side === 'w' ? 'Weiß' : 'Schwarz'}. Frag mich zu jedem Zug, warum er gespielt wird.`, `We're practicing the **${opening.name}** with ${opening.side === 'w' ? 'White' : 'Black'}. Ask me why any move is played.`)}
           quick={[
-            { label: 'Warum dieser Zug?', prompt: 'Erkläre kurz die Idee hinter dem zuletzt gespielten Zug und dem nächsten Theoriezug.' },
-            { label: 'Typische Pläne', prompt: 'Welche typischen Pläne und Strukturen ergeben sich aus dieser Eröffnung für meine Seite? Max. 150 Wörter.' },
-            { label: 'Fallen', prompt: 'Welche typischen Fallen oder Fehler gibt es in dieser Eröffnung (für beide Seiten)? Nur Dinge, bei denen du dir sicher bist.' },
+            { label: L('Warum dieser Zug?', 'Why this move?'), prompt: L('Erkläre kurz die Idee hinter dem zuletzt gespielten Zug und dem nächsten Theoriezug.', 'Briefly explain the idea behind the last move played and the next theory move.') },
+            { label: L('Typische Pläne', 'Typical plans'), prompt: L('Welche typischen Pläne und Strukturen ergeben sich aus dieser Eröffnung für meine Seite? Max. 150 Wörter.', 'Which typical plans and structures arise from this opening for my side? Max. 150 words.') },
+            { label: L('Fallen', 'Traps'), prompt: L('Welche typischen Fallen oder Fehler gibt es in dieser Eröffnung (für beide Seiten)? Nur Dinge, bei denen du dir sicher bist.', "Which typical traps or mistakes exist in this opening (for both sides)? Only things you're sure about.") },
           ]}
         />
       </section>

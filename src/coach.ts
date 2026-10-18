@@ -1,17 +1,18 @@
 import { Chess } from 'chess.js';
 import { formatScore, winPercent, type EngineLine } from './engine';
+import { L, lang } from './i18n';
 
 export type Classification = 'book' | 'best' | 'excellent' | 'good' | 'inaccuracy' | 'mistake' | 'blunder' | 'great';
 
 export const CLASS_INFO: Record<Classification, { label: string; icon: string; color: string }> = {
-  great: { label: 'Großartiger Zug', icon: '!', color: '#749bbf' },
-  best: { label: 'Bester Zug', icon: '', color: '#81b64c' },
-  excellent: { label: 'Exzellent', icon: '', color: '#96bc4b' },
-  good: { label: 'Gut', icon: '', color: '#95af8a' },
-  book: { label: 'Theoriezug', icon: '', color: '#a88865' },
-  inaccuracy: { label: 'Ungenauigkeit', icon: '?!', color: '#f7c045' },
-  mistake: { label: 'Fehler', icon: '?', color: '#ffa459' },
-  blunder: { label: 'Patzer', icon: '??', color: '#fa412d' },
+  great: { label: L('Großartiger Zug', 'Great move'), icon: '!', color: '#749bbf' },
+  best: { label: L('Bester Zug', 'Best move'), icon: '', color: '#81b64c' },
+  excellent: { label: L('Exzellent', 'Excellent'), icon: '', color: '#96bc4b' },
+  good: { label: L('Gut', 'Good'), icon: '', color: '#95af8a' },
+  book: { label: L('Theoriezug', 'Book move'), icon: '', color: '#a88865' },
+  inaccuracy: { label: L('Ungenauigkeit', 'Inaccuracy'), icon: '?!', color: '#f7c045' },
+  mistake: { label: L('Fehler', 'Mistake'), icon: '?', color: '#ffa459' },
+  blunder: { label: L('Patzer', 'Blunder'), icon: '??', color: '#fa412d' },
 };
 
 export interface MoveReview {
@@ -93,10 +94,28 @@ export function reviewMove(fenBefore: string, uci: string, san: string, before: 
 
 // ---------- Prompting ----------
 
-const BEGINNER_RULES = `- Der Schüler ist noch Anfänger und liest Notation schwer: Nenne bei jedem Zug die Figur in Worten, z. B. „Springer nach f3 (Nf3)“ oder „Läufer schlägt auf f7 mit Schach (Bxf7+)“.
+const EN = lang === 'en';
+
+const BEGINNER_RULES = EN
+  ? `- The student is still a beginner and finds notation hard to read: for every move, name the piece in words, e.g. "knight to f3 (Nf3)" or "bishop takes on f7 with check (Bxf7+)".
+- When you describe a continuation, alternative or threat, ADDITIONALLY output it machine-readably on its own line: "VARIATION: Nf3 Nc6 d4" (SAN without move numbers, max. 8 half-moves, only moves from the provided data). At most 2 such lines. The student can click through them on the board move by move.`
+  : `- Der Schüler ist noch Anfänger und liest Notation schwer: Nenne bei jedem Zug die Figur in Worten, z. B. „Springer nach f3 (Nf3)“ oder „Läufer schlägt auf f7 mit Schach (Bxf7+)“.
 - Wenn du eine Fortsetzung, Alternative oder Drohung beschreibst, gib sie ZUSÄTZLICH in einer eigenen Zeile maschinenlesbar aus: "VARIANTE: Nf3 Nc6 d4" (SAN ohne Zugnummern, max. 8 Halbzüge, nur Züge aus den mitgelieferten Daten). Höchstens 2 solche Zeilen. Der Schüler kann sie auf dem Brett Zug für Zug durchklicken.`;
 
-export const COACH_INSTRUCTIONS = `Du bist "Coach", ein freundlicher, motivierender Schachtrainer – so wie der Coach-Modus auf chess.com.
+export const COACH_INSTRUCTIONS = EN
+  ? `You are "Coach", a friendly, motivating chess trainer – like the coach mode on the big chess sites.
+You accompany the student during a game against a bot. Always answer in English.
+
+Rules:
+- Evaluations and variations come EXCLUSIVELY from the provided Stockfish data. Don't invent moves; check every claim against the position (FEN/diagram).
+- Explain the IDEA behind moves: threats, hanging pieces, tactics (fork, pin, skewer, discovered attack), king safety, development, center, pawn structure, plans.
+- Adapt your language to the student's level (about {LEVEL} Elo). Don't throw engine numbers around unless they help ("you're clearly better").
+- Notation: moves in SAN (e.g. Nf3, Bxe5, O-O).
+- Keep it short: move comments 1–3 sentences. Chat questions may get longer answers (max. ~120 words).
+- For hints, do NOT reveal the move – only hint at the idea or the area.
+${BEGINNER_RULES}
+- Optionally, at the very end you may output ONE line "ARROWS: e2e4 g1f3" (max. 3, UCI format) to draw arrows on the board. Green = good. Only squares/moves that make sense in the position.`
+  : `Du bist "Coach", ein freundlicher, motivierender Schachtrainer – so wie der Coach-Modus auf chess.com.
 Du begleitest den Schüler während einer Partie gegen einen Bot und sprichst ihn mit "du" an.
 
 Regeln:
@@ -122,16 +141,18 @@ export interface GameContext {
   note?: string;
 }
 
+const side = (c: 'w' | 'b') => (c === 'w' ? L('Weiß', 'White') : L('Schwarz', 'Black'));
+
 export function contextBlock(ctx: GameContext) {
   const moves = ctx.history.map((m, i) => (i % 2 === 0 ? `${i / 2 + 1}. ${m}` : m)).join(' ');
   return [
     ctx.note ?? '',
-    `Schüler spielt: ${ctx.playerColor === 'w' ? 'Weiß' : 'Schwarz'} gegen ${ctx.opponent}`,
-    `Partie bisher: ${moves || '(noch keine Züge)'}`,
-    `Aktuelle Stellung (FEN): ${ctx.fen}`,
-    `Diagramm (Großbuchstaben = Weiß):\n${ctx.ascii}`,
-    ctx.evalText ? `Stockfish-Bewertung (Sicht Weiß): ${ctx.evalText}` : '',
-    ctx.topLines?.length ? `Stockfish beste Fortsetzungen:\n${ctx.topLines.join('\n')}` : '',
+    L(`Schüler spielt: ${side(ctx.playerColor)} gegen ${ctx.opponent}`, `Student plays: ${side(ctx.playerColor)} against ${ctx.opponent}`),
+    L(`Partie bisher: ${moves || '(noch keine Züge)'}`, `Game so far: ${moves || '(no moves yet)'}`),
+    L(`Aktuelle Stellung (FEN): ${ctx.fen}`, `Current position (FEN): ${ctx.fen}`),
+    L(`Diagramm (Großbuchstaben = Weiß):\n${ctx.ascii}`, `Diagram (uppercase = White):\n${ctx.ascii}`),
+    ctx.evalText ? L(`Stockfish-Bewertung (Sicht Weiß): ${ctx.evalText}`, `Stockfish evaluation (White's view): ${ctx.evalText}`) : '',
+    ctx.topLines?.length ? L(`Stockfish beste Fortsetzungen:\n${ctx.topLines.join('\n')}`, `Stockfish best continuations:\n${ctx.topLines.join('\n')}`) : '',
   ]
     .filter(Boolean)
     .join('\n');
@@ -139,6 +160,22 @@ export function contextBlock(ctx: GameContext) {
 
 export function movePrompt(ctx: GameContext, r: MoveReview) {
   const ci = CLASS_INFO[r.classification];
+  const bad = ['inaccuracy', 'mistake', 'blunder'].includes(r.classification);
+  if (EN)
+    return `${contextBlock(ctx)}
+
+The student just played ${r.san} (the position above is AFTER the move).
+Engine verdict: ${ci.label} (loss ≈ ${r.winLoss.toFixed(1)} percentage points of winning chance)
+Evaluation before: ${r.evalBefore}, after: ${r.evalAfter} (both from the student's view)
+Best move would have been: ${r.bestSan} – line: ${r.bestPvSan.join(' ')}
+Top candidates before: ${r.alternatives.map((a) => `${a.san} (${a.eval})`).join(', ')}
+Opponent's best reply now: ${r.replyPvSan.join(' ') || '–'}
+
+Comment on the move briefly like a coach. ${
+      bad
+        ? `Explain concretely WHAT the problem is (e.g. what the opponent now threatens with ${r.replyPvSan[0] ?? 'their reply'}) and why ${r.bestSan} was better. Output the better continuation as a VARIATION from the position BEFORE the student's move (starting with ${r.bestSan}) and – if helpful – the opponent's reply to the played move as a second VARIATION from the current position.`
+        : 'Praise briefly and explain the idea or what the student should watch out for next.'
+    }`;
   return `${contextBlock(ctx)}
 
 Der Schüler hat gerade ${r.san} gespielt (Stellung oben ist NACH dem Zug).
@@ -149,13 +186,17 @@ Top-Kandidaten vorher: ${r.alternatives.map((a) => `${a.san} (${a.eval})`).join(
 Beste Antwort des Gegners jetzt: ${r.replyPvSan.join(' ') || '–'}
 
 Kommentiere den Zug kurz wie ein Coach. ${
-    ['inaccuracy', 'mistake', 'blunder'].includes(r.classification)
+    bad
       ? `Erkläre konkret, WAS das Problem ist (z. B. was der Gegner jetzt mit ${r.replyPvSan[0] ?? 'seiner Antwort'} droht) und warum ${r.bestSan} besser war. Gib die bessere Fortsetzung als VARIANTE ab der Stellung VOR dem Zug des Schülers aus (beginnend mit ${r.bestSan}) und – falls hilfreich – die Antwort des Gegners auf den gespielten Zug als zweite VARIANTE ab der aktuellen Stellung.`
       : 'Lobe kurz und erkläre die Idee oder worauf der Schüler als Nächstes achten sollte.'
   }`;
 }
 
 export function hintPrompt(ctx: GameContext, level: 1 | 2) {
+  if (EN)
+    return `${contextBlock(ctx)}
+
+The student is to move and asks for a ${level === 1 ? 'small hint. Do NOT reveal the move – only name the idea, the motif or which piece/area is interesting. No arrows.' : 'clearer hint: name the piece that should move and the idea, but not the destination square yet.'}`;
   return `${contextBlock(ctx)}
 
 Der Schüler ist am Zug und bittet um einen ${level === 1 ? 'kleinen Hinweis. Verrate den Zug NICHT – nenne nur die Idee, das Motiv oder welche Figur/welcher Bereich interessant ist. Keine Pfeile.' : 'deutlicheren Hinweis: Nenne die Figur, die ziehen sollte, und die Idee, aber noch nicht das Zielfeld.'}`;
@@ -164,17 +205,33 @@ Der Schüler ist am Zug und bittet um einen ${level === 1 ? 'kleinen Hinweis. Ve
 export function chatPrompt(ctx: GameContext, question: string) {
   return `${contextBlock(ctx)}
 
-Frage des Schülers: ${question}`;
+${L('Frage des Schülers', "Student's question")}: ${question}`;
 }
 
 export function botMovePrompt(ctx: GameContext, botSan: string, threatPv: string[]) {
+  if (EN)
+    return `${contextBlock(ctx)}
+
+The opponent (${ctx.opponent}) just played ${botSan}. Engine main line for the student now: ${threatPv.join(' ') || '–'}
+Explain in 1–2 sentences what the opponent is planning or threatening with ${botSan}, so the student stays alert. Don't reveal the best reply directly.`;
   return `${contextBlock(ctx)}
 
 Der Gegner (${ctx.opponent}) hat gerade ${botSan} gespielt. Engine-Hauptvariante für den Schüler jetzt: ${threatPv.join(' ') || '–'}
 Erkläre in 1–2 Sätzen, was der Gegner mit ${botSan} vorhat bzw. droht, damit der Schüler aufpasst. Verrate den besten Antwortzug nicht direkt.`;
 }
 
-export const TRAINER_INSTRUCTIONS = `Du bist "Coach", ein freundlicher, präziser Schachtrainer wie auf chess.com. Du hilfst dem Schüler beim Training: Taktikaufgaben, Lektionen, Eröffnungen und Partie-Analysen. Sprich ihn mit "du" an.
+export const TRAINER_INSTRUCTIONS = EN
+  ? `You are "Coach", a friendly, precise chess trainer like on the big chess sites. You help the student train: tactics puzzles, lessons, openings and game reviews. Always answer in English.
+
+Rules:
+- Evaluations and variations come EXCLUSIVELY from the provided data (Stockfish, solution moves, theory lines). Don't invent moves and check claims against the position (FEN/diagram).
+- Explain the IDEA: threats, motifs (fork, pin, skewer, discovered attack, deflection, overloading …), plans, typical mistakes.
+- Student level: about {LEVEL} Elo. Clear, short sentences. Moves in SAN (Nf3, Bxe5, O-O).
+- Keep it short (usually 2–5 sentences) unless the student explicitly wants a detailed explanation or lesson.
+- When asked for a hint: don't reveal the move, only hint at the idea.
+${BEGINNER_RULES}
+- Optionally, at the very end you may output ONE line "ARROWS: e2e4 g1f3" (max. 3, UCI format) to draw arrows on the board.`
+  : `Du bist "Coach", ein freundlicher, präziser Schachtrainer wie auf chess.com. Du hilfst dem Schüler beim Training: Taktikaufgaben, Lektionen, Eröffnungen und Partie-Analysen. Sprich ihn mit "du" an.
 
 Regeln:
 - Bewertungen und Varianten kommen AUSSCHLIESSLICH aus den mitgelieferten Daten (Stockfish, Lösungszüge, Theorie-Linien). Erfinde keine Züge und prüfe Aussagen gegen die Stellung (FEN/Diagramm).
@@ -188,7 +245,11 @@ ${BEGINNER_RULES}
 /** Stellungsbeschreibung für den Coach */
 export function positionBlock(fen: string, extra: string[] = []) {
   const c = new Chess(fen);
-  const side = c.turn() === 'w' ? 'Weiß' : 'Schwarz';
-  const state = c.isCheckmate() ? `Schachmatt – ${side} ist matt gesetzt.` : c.isStalemate() ? `Patt – ${side} hat keinen legalen Zug.` : `${side} ist am Zug${c.inCheck() ? ' und steht im Schach' : ''}.`;
-  return [`Stellung (FEN): ${fen}`, state, `Diagramm (Großbuchstaben = Weiß):\n${c.ascii()}`, ...extra].filter(Boolean).join('\n');
+  const s = side(c.turn());
+  const state = c.isCheckmate()
+    ? L(`Schachmatt – ${s} ist matt gesetzt.`, `Checkmate – ${s} is mated.`)
+    : c.isStalemate()
+      ? L(`Patt – ${s} hat keinen legalen Zug.`, `Stalemate – ${s} has no legal move.`)
+      : L(`${s} ist am Zug${c.inCheck() ? ' und steht im Schach' : ''}.`, `${s} to move${c.inCheck() ? ' and in check' : ''}.`);
+  return [L(`Stellung (FEN): ${fen}`, `Position (FEN): ${fen}`), state, L(`Diagramm (Großbuchstaben = Weiß):\n${c.ascii()}`, `Diagram (uppercase = White):\n${c.ascii()}`), ...extra].filter(Boolean).join('\n');
 }

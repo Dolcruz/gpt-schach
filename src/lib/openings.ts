@@ -1,4 +1,5 @@
 // Eröffnungstrainer: Hauptvarianten zum Nachspielen
+import { lang } from '../i18n';
 
 export interface Opening {
   id: string;
@@ -94,3 +95,37 @@ export const OPENINGS: Opening[] = [
     idea: 'Weiß bereitet mit Nc3 den Vorstoß f4 vor und bekommt einen gefährlichen Königsangriff.',
   },
 ];
+
+// ---------- English ----------
+
+const OPENINGS_EN: Record<string, { name: string; idea: string }> = {
+  italian: { name: 'Italian Game', idea: 'Fast development with the bishop aiming at f7. With c3 and d3 White builds a solid center and prepares d4 later.' },
+  ruy: { name: 'Ruy Lopez', idea: 'The bishop pressures the knight on c6, which defends e5. In the long run White plays for the center with c3 and d4.' },
+  scotch: { name: 'Scotch Game', idea: 'White opens the center immediately with d4 and gets free piece play.' },
+  twoknights: { name: 'Two Knights Defense', idea: 'Black defends actively against the attack on f7: in return for the pawn Black gets fast development and the initiative.' },
+  najdorf: { name: 'Sicilian Najdorf', idea: 'Black fights for the center asymmetrically. …a6 prevents Nb5/Bb5 and prepares …e5 or …b5.' },
+  french: { name: 'French Defense – Advance Variation', idea: "Black attacks White's pawn chain at its base (d4). The queen on b6 and the knight on c6 add pressure." },
+  caro: { name: 'Caro-Kann – Classical', idea: 'A solid structure: Black develops the light-squared bishop outside the pawn chain and stands very stable.' },
+  scandi: { name: 'Scandinavian Defense', idea: 'Black challenges the center right away. The queen is safe on a5, and Black builds a solid setup with c6, Bf5 and e6.' },
+  london: { name: 'London System', idea: 'An easy-to-learn system: bishop to f4, pawns on c3–d4–e3, then Bd3, Nbd2, O-O. Works against almost anything.' },
+  qgd: { name: "Queen's Gambit Declined", idea: 'Black holds the d5 strongpoint with e6. Classical and solid, with the freeing break …c5 later.' },
+  qga: { name: "Queen's Gambit Accepted", idea: 'White wins the pawn back with Bxc4 and has a strong center with fast development.' },
+  slav: { name: 'Slav Defense', idea: "Like the Queen's Gambit, but the light-squared bishop gets out before the pawn chain (Bf5)." },
+  kid: { name: "King's Indian Defense", idea: 'Black first lets White have the center and then attacks it with …e5 and later …f5 on the kingside.' },
+  nimzo: { name: 'Nimzo-Indian Defense', idea: 'Black pins the knight on c3 and fights for e4. Black often gives up the bishop pair for a healthy structure.' },
+  english: { name: 'English Opening', idea: 'A reversed Sicilian: White controls the center from the flank, the bishop on g2 works along the long diagonal.' },
+  vienna: { name: 'Vienna Game', idea: 'With Nc3 White prepares f4 and gets a dangerous kingside attack.' },
+};
+
+if (lang === 'en') for (const o of OPENINGS) Object.assign(o, OPENINGS_EN[o.id] ?? {});
+
+/** Angezeigter Name einer Eröffnungsfamilie */
+export function familyLabel(f: Opening['family']) {
+  if (lang !== 'en') return f;
+  return {
+    'Offene Spiele (1.e4 e5)': 'Open Games (1.e4 e5)',
+    'Halboffene Spiele (1.e4 andere)': 'Semi-Open Games (1.e4 other)',
+    'Geschlossene Spiele (1.d4)': 'Closed Games (1.d4)',
+    Flankeneröffnungen: 'Flank Openings',
+  }[f];
+}

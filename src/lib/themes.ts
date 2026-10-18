@@ -1,3 +1,4 @@
+import { L, lang } from '../i18n';
 // Lichess-Puzzle-Themen mit deutschen Bezeichnungen
 export const THEME_NAMES: Record<string, string> = {
   mate: 'Matt',
@@ -74,11 +75,87 @@ export const THEME_NAMES: Record<string, string> = {
   superGM: 'Super-GM-Partie',
 };
 
-export const themeName = (t: string) => THEME_NAMES[t] ?? t;
+
+const THEME_NAMES_EN: Record<string, string> = {
+  mate: 'Mate',
+  mateIn1: 'Mate in 1',
+  mateIn2: 'Mate in 2',
+  mateIn3: 'Mate in 3',
+  mateIn4: 'Mate in 4',
+  mateIn5: 'Mate in 5+',
+  backRankMate: 'Back-rank mate',
+  smotheredMate: 'Smothered mate',
+  anastasiaMate: "Anastasia's mate",
+  arabianMate: 'Arabian mate',
+  hookMate: 'Hook mate',
+  bodenMate: "Boden's mate",
+  doubleBishopMate: 'Double bishop mate',
+  dovetailMate: 'Dovetail mate',
+  epauletteMate: 'Epaulette mate',
+  killBoxMate: 'Kill box mate',
+  vukovicMate: 'Vuković mate',
+  blindSwineMate: 'Blind swine mate',
+  cornerMate: 'Corner mate',
+  triangleMate: 'Triangle mate',
+  balestraMate: 'Balestra mate',
+  morphysMate: "Morphy's mate",
+  operaMate: 'Opera mate',
+  pillsburysMate: "Pillsbury's mate",
+  swallowstailMate: "Swallow's tail mate",
+  fork: 'Fork',
+  pin: 'Pin',
+  skewer: 'Skewer',
+  discoveredAttack: 'Discovered attack',
+  discoveredCheck: 'Discovered check',
+  doubleCheck: 'Double check',
+  deflection: 'Deflection',
+  attraction: 'Attraction',
+  clearance: 'Clearance',
+  interference: 'Interference',
+  xRayAttack: 'X-ray attack',
+  intermezzo: 'Intermezzo',
+  capturingDefender: 'Capture the defender',
+  trappedPiece: 'Trapped piece',
+  hangingPiece: 'Hanging piece',
+  sacrifice: 'Sacrifice',
+  zugzwang: 'Zugzwang',
+  quietMove: 'Quiet move',
+  defensiveMove: 'Defensive move',
+  exposedKing: 'Exposed king',
+  kingsideAttack: 'Kingside attack',
+  queensideAttack: 'Queenside attack',
+  attackingF2F7: 'Attacking f2/f7',
+  advancedPawn: 'Advanced pawn',
+  promotion: 'Promotion',
+  underPromotion: 'Underpromotion',
+  enPassant: 'En passant',
+  castling: 'Castling',
+  equality: 'Equality',
+  advantage: 'Advantage',
+  crushing: 'Crushing',
+  opening: 'Opening',
+  middlegame: 'Middlegame',
+  endgame: 'Endgame',
+  pawnEndgame: 'Pawn endgame',
+  rookEndgame: 'Rook endgame',
+  queenEndgame: 'Queen endgame',
+  bishopEndgame: 'Bishop endgame',
+  knightEndgame: 'Knight endgame',
+  queenRookEndgame: 'Queen and rook endgame',
+  oneMove: 'One move',
+  short: 'Short',
+  long: 'Long',
+  veryLong: 'Very long',
+  master: 'Master game',
+  masterVsMaster: 'Master vs master',
+  superGM: 'Super GM game',
+};
+
+export const themeName = (t: string) => (lang === 'en' ? THEME_NAMES_EN[t] : THEME_NAMES[t]) ?? t;
 
 /** Auswahl für den Themenfilter bei Puzzles */
-export const PUZZLE_FILTERS: { id: string; label: string }[] = [
-  { id: '', label: 'Alle Themen (gemischt)' },
+export const PUZZLE_FILTERS: { id: string; label: string }[] = ([
+  { id: '', label: L('Alle Themen (gemischt)', 'All themes (mixed)') },
   { id: 'mateIn1', label: 'Matt in 1' },
   { id: 'mateIn2', label: 'Matt in 2' },
   { id: 'mateIn3', label: 'Matt in 3' },
@@ -101,7 +178,7 @@ export const PUZZLE_FILTERS: { id: string; label: string }[] = [
   { id: 'pawnEndgame', label: 'Bauernendspiel' },
   { id: 'promotion', label: 'Umwandlung' },
   { id: 'zugzwang', label: 'Zugzwang' },
-];
+] as { id: string; label: string }[]).map((f) => (f.id ? { ...f, label: themeName(f.id) } : f));
 
 /** Themen, die nur Länge/Herkunft beschreiben – im UI ausblenden */
 export const META_THEMES = new Set(['oneMove', 'short', 'long', 'veryLong', 'master', 'masterVsMaster', 'superGM', 'advantage', 'crushing', 'equality', 'mate']);
