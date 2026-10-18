@@ -1,0 +1,38 @@
+{
+  "name": "gpt-schach",
+  "version": "1.0.0",
+  "description": "Schach-Training wie bei den großen Seiten – Bots, Coach mit deinem eigenen ChatGPT-Abo, Puzzles, Lektionen, Analyse und Bullet. Läuft lokal.",
+  "scripts": {
+    "dev": "node dev.mjs",
+    "build": "tsc --noEmit && vite build",
+    "start": "node launch.mjs",
+    "shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/create-shortcut.ps1"
+  },
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "dependencies": {
+    "@dicebear/collection": "^9.2.2",
+    "@dicebear/core": "^9.2.2",
+    "chess.js": "^1.4.0",
+    "chessground": "^9.2.1",
+    "express": "^4.21.2",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "stockfish": "^17.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.30",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.5.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=20.11"
+  }
+}

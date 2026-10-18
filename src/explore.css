@@ -1,0 +1,23 @@
+/* ---------- Erkunden-Modus ---------- */
+.explore-bar { background: #2e3b2a; box-shadow: inset 0 0 0 1px rgba(129, 182, 76, 0.5); }
+.explore-bar .var-icon { background: var(--green); }
+.explore-bar .var-info span { color: #d6e8c4; }
+
+.explore-panel { flex-shrink: 0; padding: 10px 12px; border-bottom: 1px solid var(--line); background: #232f20; display: flex; flex-direction: column; gap: 6px; animation: rise 0.2s var(--ease); }
+.xp-head { display: flex; align-items: center; gap: 12px; }
+.xp-eval { min-width: 78px; text-align: center; font-size: 1.35rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; background: #f0efed; color: #262421; font-variant-numeric: tabular-nums; }
+.xp-sub { display: flex; flex-direction: column; line-height: 1.25; }
+.xp-sub b { font-size: 0.82rem; font-weight: 800; }
+.xp-sub span { font-size: 0.72rem; color: var(--muted); }
+.xp-last { display: flex; align-items: center; gap: 8px; font-size: 0.84rem; padding: 6px 8px; border-radius: 6px; background: rgba(0, 0, 0, 0.22); }
+.xp-last b { font-weight: 800; }
+.xp-last > span > span { font-weight: 800; }
+.xp-lines { display: flex; flex-direction: column; gap: 1px; }
+.xp-moves { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 4px; font-size: 0.8rem; max-height: 64px; overflow-y: auto; }
+.xp-label { font-size: 0.72rem; font-weight: 800; color: var(--muted); margin-right: 4px; }
+.xp-move { font-weight: 800; padding: 2px 5px; border-radius: 4px; color: var(--text); }
+.xp-move i { font-style: normal; font-weight: 600; color: var(--muted); margin-right: 2px; }
+.xp-move:hover { background: rgba(255, 255, 255, 0.08); }
+.xp-move.on { background: var(--green); color: #fff; }
+.xp-move.on i { color: rgba(255, 255, 255, 0.8); }
+.var-bar .var-close + .var-close { margin-left: -4px; }

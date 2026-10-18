@@ -1,0 +1,52 @@
+/* ---------- Varianten zum Durchklicken ---------- */
+.player-bar[hidden] { display: none; }
+
+/* Zugfolge in einer (weißen) Sprechblase */
+.var-line { width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 8px; padding-top: 7px; border-top: 1px solid #ecebe9; }
+.review .var-line:first-of-type { margin-top: 2px; }
+.var-open {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 0.74rem; font-weight: 800; color: #fff; background: #4d8acb;
+  padding: 3px 8px; border-radius: 999px; box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.18); transition: filter 0.15s;
+}
+.var-open:hover { filter: brightness(1.1); }
+.var-moves { display: inline-flex; flex-wrap: wrap; gap: 2px; }
+.var-move { font-size: 0.8rem; font-weight: 800; color: #312e2b; padding: 2px 5px; border-radius: 4px; transition: background 0.12s; }
+.var-move i { font-style: normal; font-weight: 600; color: #8b8987; margin-right: 2px; }
+.var-move:hover { background: #ecebe9; }
+.var-move.on { background: #4d8acb; color: #fff; }
+.var-move.on i { color: rgba(255, 255, 255, 0.75); }
+.var-line.active .var-open { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #4d8acb; }
+
+/* Leiste über dem Brett */
+.var-bar {
+  height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 8px; border-radius: 6px;
+  background: #2b3a4d; box-shadow: inset 0 0 0 1px rgba(77, 138, 203, 0.45); animation: pop 0.2s var(--ease);
+}
+.var-icon { width: 32px; height: 32px; border-radius: 4px; background: #4d8acb; color: #fff; display: grid; place-items: center; flex-shrink: 0; }
+.var-info { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.var-info b { font-size: 0.82rem; font-weight: 800; }
+.var-info span { font-size: 0.8rem; color: #cfe0f3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.var-nav { display: flex; align-items: center; gap: 2px; }
+.var-nav button { width: 30px; height: 30px; border-radius: 4px; display: grid; place-items: center; color: #fff; background: rgba(255, 255, 255, 0.08); transition: background 0.15s; }
+.var-nav button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.18); }
+.var-nav button:disabled { opacity: 0.35; }
+.var-count { font-size: 0.75rem; font-weight: 800; min-width: 34px; text-align: center; color: #cfe0f3; }
+.var-close { display: inline-flex; align-items: center; gap: 4px; font-size: 0.76rem; font-weight: 800; padding: 6px 9px; border-radius: 4px; background: rgba(255, 255, 255, 0.1); color: #fff; }
+.var-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* Ansicht einer früheren Stellung in der Partie */
+.view-pill {
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 6; display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(33, 31, 28, 0.92); color: var(--text); font-size: 0.8rem; padding: 7px 12px; border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45); white-space: nowrap;
+}
+.view-pill b { color: var(--green); }
+.view-pill:hover { background: #211f1c; }
+.mv.clickable { cursor: pointer; }
+.mv.clickable:hover { background: rgba(255, 255, 255, 0.08); }
+.game-nav { border-top: 1px solid var(--line); }
+
+/* Engine-Zeilen in der Analyse: Bewertung = Zug spielen, Variante = durchklicken */
+.engine-line .pill { cursor: pointer; }
+.engine-line .pv { text-align: left; flex: 1; min-width: 0; padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; }
+.engine-line .pv:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
