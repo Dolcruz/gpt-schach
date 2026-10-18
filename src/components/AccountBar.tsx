@@ -83,7 +83,7 @@ export function AccountBar({ auth, setAuth, settings, setSettings }: Props) {
     return (
       <div className="account">
         <div className="account-title">
-          <Sparkles size={14} /> Coach-KI
+          <Sparkles size={14} /> {L('Coach-KI', 'AI coach')}
         </div>
         <p className="account-hint">{L('Verbinde dein ChatGPT-Abo, damit der Coach Züge erklärt.', 'Connect your ChatGPT subscription so the coach can explain moves.')}</p>
         <button className="btn primary block" onClick={login} disabled={busy}>
@@ -100,7 +100,7 @@ export function AccountBar({ auth, setAuth, settings, setSettings }: Props) {
   return (
     <div className="account">
       <div className="account-title">
-        <Sparkles size={14} /> Coach-KI
+        <Sparkles size={14} /> {L('Coach-KI', 'AI coach')}
       </div>
       <Select
         label={L('Modell', 'Model')}
