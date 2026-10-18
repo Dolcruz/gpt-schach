@@ -19,6 +19,7 @@ function newestMtime(dir) {
 }
 
 function openBrowser(url) {
+  if (process.env.NO_OPEN) return;
   const cmd = process.platform === 'win32' ? ['cmd', ['/c', 'start', '', url]] : process.platform === 'darwin' ? ['open', [url]] : ['xdg-open', [url]];
   spawn(cmd[0], cmd[1], { stdio: 'ignore', detached: true }).unref();
 }
