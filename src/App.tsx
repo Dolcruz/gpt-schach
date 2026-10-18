@@ -93,7 +93,7 @@ export function App() {
         <button className="logo" onClick={() => navigate('coach')}>
           <Piece type="n" color="w" size={30} />
           <span>
-            Schach<b>Coach</b>
+            GPT-<b>Schach</b>
           </span>
         </button>
         <nav>

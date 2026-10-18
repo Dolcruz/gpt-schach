@@ -266,5 +266,5 @@ if (fs.existsSync(dist)) {
 }
 
 // Nur lokal erreichbar – IPv4 und IPv6, damit *.localhost-Adressen im Browser direkt funktionieren
-app.listen(PORT, '127.0.0.1', () => console.log(`Schach-Coach Server läuft auf ${APP_URL}`));
+app.listen(PORT, '127.0.0.1', () => console.log(`GPT-Schach Server läuft auf ${APP_URL}`));
 app.listen(PORT, '::1').on('error', () => {});

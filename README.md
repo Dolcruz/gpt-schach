@@ -3,7 +3,7 @@
 **Schach-Training mit KI-Coach – lokal auf deinem Rechner, mit deinem eigenen ChatGPT-Abo.**
 Bots mit Persönlichkeit, ein Coach, der jeden Zug erklärt, unbegrenzt Taktikaufgaben, Lektionen, Eröffnungstrainer, Partie-Analyse, Bullet-Training und Statistiken – ohne weiteres Abo, ohne Konto bei einer Schachseite.
 
-![GPT-Schach](docs/screenshot-coach.png)
+![GPT-Schach – Bots mit Kronen](docs/screenshot-bots.png)
 
 > 🇬🇧 *A local chess trainer in the style of the big chess sites: bots with personalities, a coach that explains every move (powered by your own ChatGPT subscription via “Sign in with ChatGPT”), unlimited puzzles, lessons, opening trainer, game review, bullet training and stats. UI is in German.*
 
@@ -23,6 +23,12 @@ Bots mit Persönlichkeit, ein Coach, der jeden Zug erklärt, unbegrenzt Taktikau
 | **Statistik** | Spielstärke, Puzzle-Rating, Bullet-Wertung, Siegquote früher vs. jetzt, Stärken und Schwächen |
 
 Die Schach-Engine (Stockfish 17.1) läuft direkt im Browser. Der Coach nutzt dein ChatGPT-Konto – ohne Anmeldung funktioniert alles außer den Text-Erklärungen.
+
+## Screenshots
+
+| Puzzles | Lernen | Bullet |
+|---|---|---|
+| ![Puzzles](docs/screenshot-puzzles.png) | ![Lernen](docs/screenshot-learn.png) | ![Bullet](docs/screenshot-bullet.png) |
 
 ## Installation
 

@@ -44,7 +44,7 @@ const index = path.join(root, 'dist', 'index.html');
 const needsBuild = !fs.existsSync(index) || newestMtime(path.join(root, 'src')) > fs.statSync(index).mtimeMs;
 if (needsBuild) {
   console.log('Baue die App (einmalig, dauert ein paar Sekunden) …');
-  const r = spawnSync('npm', ['run', 'build'], { cwd: root, stdio: 'inherit', shell: true });
+  const r = spawnSync('npm run build', { cwd: root, stdio: 'inherit', shell: true });
   if (r.status !== 0) process.exit(r.status ?? 1);
 }
 
