@@ -7,6 +7,8 @@ import { Avatar, Piece, PlayerBar } from './ui';
 import type { Mode } from '../App';
 import { store, type GameRecord } from '../lib/data';
 import { CROWNS, crownSummary, type CrownId } from '../lib/crowns';
+import { openingLine, type BookLine } from '../lib/book';
+import { OpeningSelect } from './OpeningSelect';
 
 export interface GameSetup {
   bot: Bot;
@@ -20,6 +22,8 @@ export interface GameSetup {
   backTo?: string;
   /** Schachuhr in Sekunden (z. B. Bullet 60+0) */
   timeControl?: { base: number; inc: number };
+  /** Eröffnungslinie, der der Bot folgt */
+  openingLine?: BookLine;
 }
 
 interface Props {
@@ -48,6 +52,7 @@ export function Home({ mode, loggedIn, onStart }: Props) {
   const [coachWithBot, setCoachWithBot] = useState(true);
   const [coachLevel, setCoachLevel] = useState(() => Number(localStorage.getItem('coachLevel') ?? 1000));
   const [games, setGames] = useState<GameRecord[]>([]);
+  const [opening, setOpening] = useState(() => localStorage.getItem('botOpening') ?? '');
   useEffect(() => {
     store.list('games').then(setGames).catch(() => {});
   }, []);
@@ -62,12 +67,14 @@ export function Home({ mode, loggedIn, onStart }: Props) {
 
   function start() {
     const c = color === 'r' ? (Math.random() < 0.5 ? 'w' : 'b') : color;
+    localStorage.setItem('botOpening', opening);
+    const line = openingLine(opening) ?? undefined;
     if (isCoach) {
       localStorage.setItem('coachLevel', String(coachLevel));
-      onStart({ bot: coachOpponent(coachLevel), color: c, coach: true });
+      onStart({ bot: coachOpponent(coachLevel), color: c, coach: true, openingLine: line });
     } else {
       localStorage.setItem('lastBot', bot.id);
-      onStart({ bot, color: c, coach: coachWithBot });
+      onStart({ bot, color: c, coach: coachWithBot, openingLine: line });
     }
   }
 
@@ -217,6 +224,7 @@ export function Home({ mode, loggedIn, onStart }: Props) {
               ))}
             </div>
           </div>
+          <OpeningSelect value={opening} onChange={setOpening} />
           {!isCoach && (
             <label className="switch-row">
               <span>{L('Coach schaut zu', 'Coach watches')}</span>

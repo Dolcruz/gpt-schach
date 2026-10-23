@@ -94,6 +94,56 @@ export const OPENINGS: Opening[] = [
     moves: ['e4', 'e5', 'Nc3', 'Nf6', 'Bc4', 'Nc6', 'd3', 'Bc5', 'f4', 'd6', 'Nf3', 'O-O'],
     idea: 'Weiß bereitet mit Nc3 den Vorstoß f4 vor und bekommt einen gefährlichen Königsangriff.',
   },
+  {
+    id: 'fourknights', name: 'Schottisches Vierspringerspiel', eco: 'C47', side: 'w', family: 'Offene Spiele (1.e4 e5)', level: 'Einsteiger',
+    moves: ['e4', 'e5', 'Nf3', 'Nc6', 'Nc3', 'Nf6', 'd4', 'exd4', 'Nxd4', 'Bb4', 'Nxc6', 'bxc6', 'Bd3', 'd5', 'exd5', 'cxd5', 'O-O', 'O-O', 'Bg5', 'c6'],
+    idea: 'Alle vier Springer kommen schnell heraus, dann öffnet Weiß mit d4 das Zentrum. Nach dem Tausch auf c6 deckt Bd3 den e-Bauern, Weiß rochiert und fesselt mit Bg5.',
+  },
+  {
+    id: 'kingsgambit', name: 'Königsgambit', eco: 'C39', side: 'w', family: 'Offene Spiele (1.e4 e5)', level: 'Fortgeschritten',
+    moves: ['e4', 'e5', 'f4', 'exf4', 'Nf3', 'g5', 'h4', 'g4', 'Ne5', 'Nf6', 'd4', 'd6', 'Nd3', 'Nxe4'],
+    idea: 'Weiß opfert den f-Bauern, um die f-Linie zu öffnen und schnell anzugreifen. Ein scharfes, romantisches Gambit.',
+  },
+  {
+    id: 'evans', name: 'Evans-Gambit', eco: 'C52', side: 'w', family: 'Offene Spiele (1.e4 e5)', level: 'Fortgeschritten',
+    moves: ['e4', 'e5', 'Nf3', 'Nc6', 'Bc4', 'Bc5', 'b4', 'Bxb4', 'c3', 'Ba5', 'd4', 'exd4', 'O-O', 'Nge7'],
+    idea: 'Ein Italienisch mit Bauernopfer: Mit b4 und c3 gewinnt Weiß Tempo für d4 und bekommt ein starkes Zentrum mit Angriff.',
+  },
+  {
+    id: 'petroff', name: 'Russische Verteidigung (Petroff)', eco: 'C42', side: 'b', family: 'Offene Spiele (1.e4 e5)', level: 'Fortgeschritten',
+    moves: ['e4', 'e5', 'Nf3', 'Nf6', 'Nxe5', 'd6', 'Nf3', 'Nxe4', 'd4', 'd5', 'Bd3', 'Nc6', 'O-O', 'Be7'],
+    idea: 'Schwarz greift sofort zurück an statt e5 zu decken. Sehr solide – aber Vorsicht: erst d6, dann den e-Bauern nehmen.',
+  },
+  {
+    id: 'dragon', name: 'Sizilianisch – Drachen', eco: 'B76', side: 'b', family: 'Halboffene Spiele (1.e4 andere)', level: 'Erfahren',
+    moves: ['e4', 'c5', 'Nf3', 'd6', 'd4', 'cxd4', 'Nxd4', 'Nf6', 'Nc3', 'g6', 'Be3', 'Bg7', 'f3', 'O-O', 'Qd2', 'Nc6', 'Bc4', 'Bd7'],
+    idea: 'Der Läufer auf g7 („Drache“) zielt auf die lange Diagonale. Oft rochieren beide Seiten entgegengesetzt und greifen sich gegenseitig an.',
+  },
+  {
+    id: 'alapin', name: 'Sizilianisch – Alapin (2.c3)', eco: 'B22', side: 'w', family: 'Halboffene Spiele (1.e4 andere)', level: 'Einsteiger',
+    moves: ['e4', 'c5', 'c3', 'Nf6', 'e5', 'Nd5', 'd4', 'cxd4', 'Nf3', 'Nc6', 'cxd4', 'd6', 'Bc4', 'Nb6', 'Bb5'],
+    idea: 'Ein ruhiger Weg gegen Sizilianisch: Mit c3 bereitet Weiß d4 vor und bekommt ein klassisches Bauernzentrum, ohne viel Theorie lernen zu müssen.',
+  },
+  {
+    id: 'pirc', name: 'Pirc-Verteidigung', eco: 'B08', side: 'b', family: 'Halboffene Spiele (1.e4 andere)', level: 'Fortgeschritten',
+    moves: ['e4', 'd6', 'd4', 'Nf6', 'Nc3', 'g6', 'Nf3', 'Bg7', 'Be2', 'O-O', 'O-O', 'c6'],
+    idea: 'Schwarz lässt Weiß das Zentrum, entwickelt den Läufer nach g7 und greift das Zentrum später mit …e5 oder …c5 an.',
+  },
+  {
+    id: 'grunfeld', name: 'Grünfeld-Indisch', eco: 'D85', side: 'b', family: 'Geschlossene Spiele (1.d4)', level: 'Erfahren',
+    moves: ['d4', 'Nf6', 'c4', 'g6', 'Nc3', 'd5', 'cxd5', 'Nxd5', 'e4', 'Nxc3', 'bxc3', 'Bg7', 'Nf3', 'c5', 'Be3', 'Qa5'],
+    idea: 'Schwarz lässt Weiß ein großes Bauernzentrum bauen und greift es dann mit dem Läufer g7 und …c5 an.',
+  },
+  {
+    id: 'catalan', name: 'Katalanisch', eco: 'E05', side: 'w', family: 'Geschlossene Spiele (1.d4)', level: 'Erfahren',
+    moves: ['d4', 'Nf6', 'c4', 'e6', 'g3', 'd5', 'Bg2', 'Be7', 'Nf3', 'O-O', 'O-O', 'dxc4', 'Qc2', 'a6', 'Qxc4', 'b5', 'Qc2', 'Bb7'],
+    idea: 'Der Läufer auf g2 drückt auf die lange Diagonale. Weiß opfert oft vorübergehend den c-Bauern und gewinnt ihn mit Qc2 zurück.',
+  },
+  {
+    id: 'dutch', name: 'Holländisch – Leningrader System', eco: 'A87', side: 'b', family: 'Geschlossene Spiele (1.d4)', level: 'Fortgeschritten',
+    moves: ['d4', 'f5', 'g3', 'Nf6', 'Bg2', 'g6', 'Nf3', 'Bg7', 'O-O', 'O-O', 'c4', 'd6', 'Nc3', 'Qe8'],
+    idea: 'Mit …f5 kontrolliert Schwarz e4 und plant einen Königsangriff, oft mit …Qe8–h5 und …e5.',
+  },
 ];
 
 // ---------- English ----------
@@ -115,6 +165,16 @@ const OPENINGS_EN: Record<string, { name: string; idea: string }> = {
   nimzo: { name: 'Nimzo-Indian Defense', idea: 'Black pins the knight on c3 and fights for e4. Black often gives up the bishop pair for a healthy structure.' },
   english: { name: 'English Opening', idea: 'A reversed Sicilian: White controls the center from the flank, the bishop on g2 works along the long diagonal.' },
   vienna: { name: 'Vienna Game', idea: 'With Nc3 White prepares f4 and gets a dangerous kingside attack.' },
+  fourknights: { name: 'Scotch Four Knights', idea: 'All four knights come out quickly, then White opens the center with d4. After the trade on c6, Bd3 protects the e-pawn, White castles and pins with Bg5.' },
+  kingsgambit: { name: "King's Gambit", idea: 'White sacrifices the f-pawn to open the f-file and attack fast. A sharp, romantic gambit.' },
+  evans: { name: 'Evans Gambit', idea: 'An Italian with a pawn sacrifice: with b4 and c3 White gains time for d4 and gets a strong center with an attack.' },
+  petroff: { name: 'Petroff Defense', idea: 'Black counter-attacks immediately instead of defending e5. Very solid – but careful: play d6 first, then take the e-pawn.' },
+  dragon: { name: 'Sicilian Dragon', idea: 'The bishop on g7 (the "dragon") aims down the long diagonal. Often both sides castle on opposite wings and attack each other.' },
+  alapin: { name: 'Sicilian Alapin (2.c3)', idea: 'A quiet way against the Sicilian: with c3 White prepares d4 and gets a classical pawn center without much theory.' },
+  pirc: { name: 'Pirc Defense', idea: 'Black lets White have the center, develops the bishop to g7 and attacks the center later with …e5 or …c5.' },
+  grunfeld: { name: 'Grünfeld Defense', idea: 'Black lets White build a big pawn center and then attacks it with the g7 bishop and …c5.' },
+  catalan: { name: 'Catalan Opening', idea: 'The bishop on g2 presses on the long diagonal. White often gives up the c-pawn temporarily and wins it back with Qc2.' },
+  dutch: { name: 'Dutch Defense – Leningrad', idea: 'With …f5 Black controls e4 and plans a kingside attack, often with …Qe8–h5 and …e5.' },
 };
 
 if (lang === 'en') for (const o of OPENINGS) Object.assign(o, OPENINGS_EN[o.id] ?? {});

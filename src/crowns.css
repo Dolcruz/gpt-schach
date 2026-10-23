@@ -41,3 +41,17 @@
 .lang-switch button { font-size: 0.7rem; font-weight: 800; padding: 3px 7px; border-radius: 4px; color: var(--muted); transition: background 0.15s, color 0.15s; }
 .lang-switch button:hover { color: #fff; background: var(--raise); }
 .lang-switch button.on { color: #fff; background: var(--raise); box-shadow: inset 0 0 0 1px var(--green); }
+
+/* ---------- Eröffnung des Bots ---------- */
+.opening-select { display: flex; flex-direction: column; gap: 6px; }
+.opening-select .select-box { width: 62%; }
+.opening-hint { font-size: 0.74rem; color: var(--text-2); font-weight: 700; margin: 0; line-height: 1.4; }
+.opening-hint span { display: block; font-weight: 500; color: var(--muted); }
+.book-chip { flex: none; display: flex; align-items: center; gap: 8px; margin: 10px 14px 0; padding: 8px 10px; border-radius: 8px; background: rgba(129, 182, 76, 0.12); box-shadow: inset 0 0 0 1px rgba(129, 182, 76, 0.35); font-size: 0.78rem; color: var(--text-2); }
+.book-chip svg { color: var(--green); flex: none; }
+.book-chip > div { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.book-chip b { color: #fff; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.book-chip span { color: var(--muted); font-size: 0.72rem; }
+.book-chip.left { background: rgba(255, 255, 255, 0.05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
+.book-chip.left svg { color: var(--muted); }
+.book-chip .icon-btn { flex: none; }

@@ -29,14 +29,17 @@ export function sanToWords(san: string): string {
 }
 
 /** Holt VARIANTE:/PFEILE:-Zeilen aus einer Coach-Antwort */
-export function extractMarkers(text: string): { text: string; lines: string[][]; arrows: string[] } {
+export function extractMarkers(text: string): { text: string; lines: string[][]; arrows: string[]; botLine?: string } {
   const lines: string[][] = [];
   let arrows: string[] = [];
+  let botLine: string | undefined;
   const kept: string[] = [];
   for (const raw of text.split(/\r?\n/)) {
     const v = raw.match(/^\s*\**(?:VARIANTE|VARIATION)\**\s*:\s*(.+)$/i);
     const a = raw.match(/^\s*\**(?:PFEILE|ARROWS)\**\s*:\s*(.+)$/i);
-    if (v) {
+    const b = raw.match(/^\s*\**BOT[-_ ](?:LINIE|LINE)\**\s*:\s*(.+)$/i);
+    if (b) botLine = b[1].replace(/[*`]+/g, '').trim();
+    else if (v) {
       const sans = v[1]
         .replace(/\d+\.(\.\.)?/g, ' ')
         .split(/[\s,]+/)
@@ -47,12 +50,14 @@ export function extractMarkers(text: string): { text: string; lines: string[][];
       arrows = a[1].split(/[\s,]+/).filter((s) => /^[a-h][1-8][a-h][1-8]/.test(s)).slice(0, 3);
     } else kept.push(raw);
   }
-  return { text: kept.join('\n').trim(), lines, arrows };
+  return { text: kept.join('\n').trim(), lines, arrows, botLine };
 }
 
 /** Während des Streamens die Marker-Zeilen ausblenden */
 export const hideMarkers = (t: string) =>
-  t.replace(/\n?[^\n]*\b(VARIANTE|VARIATION|PFEILE|ARROWS)\b\s*:[^\n]*/gi, '').replace(/\n\s*\**(VARIATI|VARIAT|VARIANT|VARIAN|VARIA|VARI|PFEIL|PFEI|ARROW|ARRO)\w*$/i, '');
+  t
+    .replace(/\n?[^\n]*\b(VARIANTE|VARIATION|PFEILE|ARROWS|BOT[-_ ](LINIE|LINE))\b\s*:[^\n]*/gi, '')
+    .replace(/\n\s*\**(VARIATI|VARIAT|VARIANT|VARIAN|VARIA|VARI|PFEIL|PFEI|ARROW|ARRO|BOT[-_ ]?\w*)\w*$/i, '');
 
 /** Prüft eine Zugfolge gegen mögliche Startstellungen; nimmt die, in der am meisten legal ist */
 export function resolveVariation(sans: string[], fens: string[], title?: string): Variation | null {

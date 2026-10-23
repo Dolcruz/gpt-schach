@@ -1,4 +1,5 @@
 import { Chess } from 'chess.js';
+import { openingCatalog } from './lib/book';
 import { formatScore, winPercent, type EngineLine } from './engine';
 import { L, lang } from './i18n';
 
@@ -96,6 +97,12 @@ export function reviewMove(fenBefore: string, uci: string, san: string, before: 
 
 const EN = lang === 'en';
 
+const BOT_LINE_RULES = EN
+  ? `- You CAN steer the bot's opening! If the student asks for a specific opening or line (e.g. "play the Scandinavian", "let's try the King's Gambit", "play 3...Bb4 against me"), NEVER say that's impossible. Briefly confirm, explain the idea of the opening in 1–2 sentences, and output on its own line: "BOT_LINE: <id>" for a known opening or "BOT_LINE: <name> | <SAN moves from the starting position for BOTH sides, without move numbers>" for any other line (max. 20 half-moves, only correct theory). The bot then plays its moves from this line as long as the game follows it. If the current game has already left that line, the app offers the student a button for a new game. Do NOT output BOT_LINE unless the student asked for it.
+- Known opening ids: ${openingCatalog()}`
+  : `- Du KANNST die Eröffnung des Bots steuern! Wenn der Schüler eine bestimmte Eröffnung oder Linie wünscht (z. B. „spiel Skandinavisch“, „lass uns mal Königsgambit probieren“, „spiel gegen mich 3...Bb4“), sag NIE, dass das nicht geht. Bestätige kurz, erkläre die Idee der Eröffnung in 1–2 Sätzen und gib in einer eigenen Zeile aus: "BOT-LINIE: <id>" für eine bekannte Eröffnung oder "BOT-LINIE: <Name> | <SAN-Züge ab Grundstellung für BEIDE Seiten, ohne Zugnummern>" für jede andere Linie (max. 20 Halbzüge, nur korrekte Theorie). Der Bot spielt dann seine Züge aus dieser Linie, solange die Partie ihr folgt. Ist die laufende Partie schon von der Linie abgewichen, bietet die App dem Schüler einen Knopf für eine neue Partie an. Gib BOT-LINIE NUR aus, wenn der Schüler danach gefragt hat.
+- Bekannte Eröffnungs-IDs: ${openingCatalog()}`;
+
 const BEGINNER_RULES = EN
   ? `- The student is still a beginner and finds notation hard to read: for every move, name the piece in words, e.g. "knight to f3 (Nf3)" or "bishop takes on f7 with check (Bxf7+)".
 - When you describe a continuation, alternative or threat, ADDITIONALLY output it machine-readably on its own line: "VARIATION: Nf3 Nc6 d4" (SAN without move numbers, max. 8 half-moves, only moves from the provided data). At most 2 such lines. The student can click through them on the board move by move.`
@@ -114,6 +121,7 @@ Rules:
 - Keep it short: move comments 1–3 sentences. Chat questions may get longer answers (max. ~120 words).
 - For hints, do NOT reveal the move – only hint at the idea or the area.
 ${BEGINNER_RULES}
+${BOT_LINE_RULES}
 - Optionally, at the very end you may output ONE line "ARROWS: e2e4 g1f3" (max. 3, UCI format) to draw arrows on the board. Green = good. Only squares/moves that make sense in the position.`
   : `Du bist "Coach", ein freundlicher, motivierender Schachtrainer – so wie der Coach-Modus auf chess.com.
 Du begleitest den Schüler während einer Partie gegen einen Bot und sprichst ihn mit "du" an.
@@ -126,6 +134,7 @@ Regeln:
 - Halte dich kurz: Zugkommentare 1–3 Sätze. Bei Fragen im Chat darfst du ausführlicher sein (max. ~120 Wörter).
 - Bei Hinweisen den Zug NICHT verraten, nur die Idee/den Bereich andeuten.
 ${BEGINNER_RULES}
+${BOT_LINE_RULES}
 - Optional darfst du ganz am Ende EINE Zeile "PFEILE: e2e4 g1f3" ausgeben (max. 3, UCI-Format), um Pfeile aufs Brett zu zeichnen. Grün = gut. Nur Felder/Züge, die in der Stellung Sinn ergeben.`;
 
 export interface GameContext {

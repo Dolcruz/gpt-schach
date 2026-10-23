@@ -32,6 +32,8 @@ import { VariationBar, VariationLine } from './Variation';
 import { useExplore } from '../lib/explore';
 import { useLiveEval } from '../lib/useLiveEval';
 import { ExploreBar, ExplorePanel } from './Explore';
+import { BookOpen } from 'lucide-react';
+import { bookMove, bookNote, bookState, fitsLine, parseBookLine, type BookLine } from '../lib/book';
 
 type Action = 'retry' | 'showBest' | 'continue';
 
@@ -45,6 +47,8 @@ interface Msg {
   actions?: Action[];
   /** Vom Coach genannte Varianten (zum Durchklicken) */
   variations?: Variation[];
+  /** Vom Coach vorgeschlagene Eröffnung, die eine neue Partie braucht */
+  newGame?: BookLine;
 }
 
 interface Props {
@@ -53,6 +57,8 @@ interface Props {
   settings: CoachSettings;
   onExit: () => void;
   onRematch: () => void;
+  /** Neue Partie gegen denselben Bot mit einer Eröffnungslinie */
+  onNewGame?: (line: BookLine) => void;
 }
 
 // Tiefe 18: ab hier werden auch Opfer-Kombinationen zuverlässig gesehen (gemessen)
@@ -61,7 +67,7 @@ const ANALYSIS_MS = 3000;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 let msgId = 0;
 
-export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
+export function Game({ setup, loggedIn, settings, onExit, onRematch, onNewGame }: Props) {
   const { bot, color: playerColor } = setup;
   const tc = setup.timeControl;
   const timed = !!tc;
@@ -118,6 +124,10 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
   const overRef = useRef(false);
   const [gainedCrowns, setGainedCrowns] = useState<CrownId[]>([]);
   const chatEnd = useRef<HTMLDivElement>(null);
+  // Eröffnungslinie, der der Bot folgt (nur aus der Grundstellung)
+  const [book, setBook] = useState<BookLine | null>(setup.startFen ? null : setup.openingLine ?? null);
+  const bookRef = useRef(book);
+  bookRef.current = book;
 
   const settingsRef = useRef(settings);
   settingsRef.current = settings;
@@ -186,10 +196,10 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
         playerColor,
         opponent: `${bot.name} (${bot.rating})`,
         level: bot.rating,
-        note: L(
+        note: [bookRef.current ? bookNote(bookRef.current, chess.current.history()) : '', L(
           `HINWEIS: Der Schüler ERKUNDET gerade hypothetische Züge, die in der Partie NICHT gespielt wurden: ${x.sans.slice(0, x.idx).join(' ') || '(noch keine)'}. Die Stellung unten ist die erkundete Stellung. Erkläre, was in dieser Variante passiert.`,
           `NOTE: The student is EXPLORING hypothetical moves that were NOT played in the game: ${x.sans.slice(0, x.idx).join(' ') || '(none yet)'}. The position below is the explored position. Explain what happens in this line.`,
-        ),
+        )].filter(Boolean).join('\n'),
         evalText: xe.top ? formatScore(xe.top.cp, xe.top.mate) : undefined,
         topLines: xe.lines.map((l) => `${formatScore(l.score * sign, l.mate !== null ? l.mate * sign : null)}: ${pvToSan(f, l.pv, 6).join(' ')}`),
       };
@@ -205,6 +215,7 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
       playerColor,
       opponent: `${bot.name} (${bot.rating})`,
       level: bot.rating,
+      note: bookRef.current ? bookNote(bookRef.current, c.history()) : undefined,
       evalText: lines[0] ? formatScore(lines[0].score * sign, lines[0].mate !== null ? lines[0].mate * sign : null) : undefined,
       topLines: lines.map((l) => `${formatScore(l.score * sign, l.mate !== null ? l.mate * sign : null)}: ${pvToSan(f, l.pv, 6).join(' ')}`),
     };
@@ -231,7 +242,14 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
           (t) => patchMsg(id, { text: hideMarkers(t) }),
           ctl.signal,
         );
-        const { text, arrows, lines } = extractMarkers(full);
+        const { text, arrows, lines, botLine: spec } = extractMarkers(full);
+        // Coach stellt die Eröffnung des Bots um
+        const wanted = spec && !setup.startFen ? parseBookLine(spec) : null;
+        let newGame: BookLine | undefined;
+        if (wanted) {
+          if (fitsLine(wanted, chess.current.history()) && chess.current.history().length < wanted.sans.length) setBook(wanted);
+          else newGame = wanted;
+        }
         // Varianten gegen die passenden Stellungen prüfen (vor/nach dem Zug bzw. aktuelle Stellung)
         const fens = opts.review ? [opts.review.fenBefore, opts.review.fenAfter] : [chess.current.fen()];
         // Varianten, die schon als Engine-Variante unter der Bewertung stehen, nicht doppelt zeigen
@@ -240,7 +258,7 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
         const variations = lines
           .map((l, i) => resolveVariation(l, fens, lines.length > 1 ? `${L('Coach-Variante', 'Coach line')} ${i + 1}` : L('Coach-Variante', 'Coach line')))
           .filter((v): v is Variation => !!v && !isKnown(v));
-        patchMsg(id, { text, streaming: false, variations });
+        patchMsg(id, { text, streaming: false, variations, newGame });
         if (opts.drawArrows !== false && arrows.length && e === epoch.current)
           setShapes(arrows.map((a) => ({ orig: a.slice(0, 2) as Key, dest: a.slice(2, 4) as Key, brush: 'green' })));
       } catch (err: any) {
@@ -250,7 +268,7 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
         moveStreams.current.delete(ctl);
       }
     },
-    [addMsg, patchMsg, bot.rating],
+    [addMsg, patchMsg, bot.rating, setup.startFen],
   );
 
   /** Uhr nach einem Zug weiterschalten: Zeit abziehen, Inkrement gutschreiben */
@@ -312,10 +330,21 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
       const left = clock.current.running ? clock.current[c.turn()] : tc.base * 1000;
       budget = Math.min(2200, Math.max(120, (left / 35 + tc.inc * 700) * (0.6 + Math.random() * 0.8)));
     }
-    const [uci] = await Promise.all([chooseBotMove(engines.current!.bot, fenBefore, bot, { movetime: tc ? Math.max(80, budget * 0.8) : undefined, lastMove: c.history({ verbose: true }).at(-1) }), sleep(budget)]);
-    if (e !== epoch.current || !uci || overRef.current) return;
+    // Theoriezug aus der gewählten Eröffnung, solange die Partie ihr folgt
+    const booked = bookMove(bookRef.current, c.history());
+    if (booked) budget = Math.min(budget, tc ? budget : 700);
+    const [uci] = await Promise.all([
+      booked ? Promise.resolve(booked) : chooseBotMove(engines.current!.bot, fenBefore, bot, { movetime: tc ? Math.max(80, budget * 0.8) : undefined, lastMove: c.history({ verbose: true }).at(-1) }),
+      sleep(budget),
+    ]);
+    if (e !== epoch.current || !uci || overRef.current || c.fen() !== fenBefore) return;
     setThinking(false);
-    const mv = c.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] });
+    let mv: Move;
+    try {
+      mv = booked ? c.move(booked) : c.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] });
+    } catch {
+      return;
+    }
     punch(mv.color);
     playSound(mv.captured ? 'capture' : mv.san.includes('+') ? 'check' : 'move');
     sync();
@@ -884,6 +913,7 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
           {coach && <span className="head-meta">{loggedIn ? settings.model : L('nur Engine', 'engine only')}</span>}
         </header>
 
+        {book && !ex.active && <BookChip line={book} history={moves.map((m) => m.san)} onClear={() => setBook(null)} />}
         <ExplorePanel ex={ex} lines={exEval.lines} top={exEval.top} lastClass={exEval.lastClass} />
         <div className="feed">
           {msgs.map((m) => (
@@ -893,6 +923,13 @@ export function Game({ setup, loggedIn, settings, onExit, onRematch }: Props) {
                 {m.review && <ReviewHead r={m.review} onOpen={openVariation} vv={vv} />}
                 {m.text && <div className="text"><Markdown text={m.text} /></div>}
                 {m.variations?.map((v, i) => <VariationLine key={i} v={v} onOpen={openVariation} active={vv.variation === v} activeIdx={vv.idx} />)}
+                {m.newGame && onNewGame && (
+                  <div className="actions">
+                    <button className="btn primary small" onClick={() => onNewGame(m.newGame!)}>
+                      <BookOpen size={15} /> {L(`Neue Partie: ${m.newGame.name}`, `New game: ${m.newGame.name}`)}
+                    </button>
+                  </div>
+                )}
                 {m.streaming && !m.text && (
                   <div className="typing">
                     <i />
@@ -1081,6 +1118,30 @@ function Clock({ ms, active }: { ms: number; active: boolean }) {
     <div className={`clock ${active ? 'running' : ''} ${low ? 'low' : ''}`}>
       {m}:{String(sec).padStart(2, '0')}
       {t < 20_000 && <small>.{tenth}</small>}
+    </div>
+  );
+}
+
+/** Zeigt, welcher Eröffnung der Bot folgt und ob die Partie noch in der Theorie ist */
+function BookChip({ line, history, onClear }: { line: BookLine; history: string[]; onClear: () => void }) {
+  const st = bookState(line, history);
+  const moveNo = (ply: number) => `${Math.floor(ply / 2) + 1}.${ply % 2 ? '..' : ''}`;
+  return (
+    <div className={`book-chip ${st.kind === 'following' ? '' : 'left'}`}>
+      <BookOpen size={18} />
+      <div>
+        <b>{line.name}</b>
+        <span>
+          {st.kind === 'following'
+            ? L(`In der Theorie · Theoriezug: ${moveNo(history.length)} ${st.next}`, `In theory · book move: ${moveNo(history.length)} ${st.next}`)
+            : st.kind === 'done'
+              ? L('Theorie-Linie zu Ende – ab hier spielt der Bot frei', 'End of the line – the bot plays freely from here')
+              : L(`Theorie verlassen bei ${moveNo(st.ply)} ${history[st.ply]} (Theorie: ${line.sans[st.ply]})`, `Left theory at ${moveNo(st.ply)} ${history[st.ply]} (book: ${line.sans[st.ply]})`)}
+        </span>
+      </div>
+      <button className="icon-btn" onClick={onClear} title={L('Eröffnung abwählen', 'Clear opening')}>
+        <X size={14} />
+      </button>
     </div>
   );
 }

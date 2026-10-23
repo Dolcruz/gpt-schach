@@ -75,6 +75,7 @@ export function App() {
         settings={settings}
         onExit={() => navigate(setup.backTo ?? (setup.coach && setup.bot.id === 'coach' ? 'coach' : 'bots'))}
         onRematch={() => startGame({ ...setup, color: setup.startFen ? setup.color : setup.color === 'w' ? 'b' : 'w' })}
+        onNewGame={setup.startFen ? undefined : (line) => startGame({ ...setup, openingLine: line })}
       />
     );
   else if (route === 'puzzles' || route === 'daily') content = <Puzzles key={route} daily={route === 'daily'} {...page} />;

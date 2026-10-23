@@ -14,11 +14,11 @@ The app is available in **English and German** (switch at the bottom left).
 | Area | What you get |
 |---|---|
 | **Coach** | Plays at your level, rates every move (best move … blunder), explains ideas in plain words, hints in 3 steps, take back/redo, clickable variations |
-| **Bots** | 20 bots from 250 to 3200 with their own playing styles (attacker, trader, copycat, gambiteer …) and **crowns** to earn |
+| **Bots** | 20 bots from 250 to 3200 with their own playing styles (attacker, trader, copycat, gambiteer …) and **crowns** to earn. Pick an **opening** the bot should play – or just ask the coach ("play the Caro-Kann against me") |
 | **Explore** | In the middle of a game, move both sides freely and watch Stockfish evaluate the position live |
 | **Bullet** | Games with a clock (30 s – 3+0) and premoves, **Puzzle Rush**, review of your thinking time |
 | **Puzzles** | Unlimited tactics puzzles from the open Lichess database, daily puzzle, your own puzzle rating, theme filter |
-| **Learn** | 30 lessons (tactics, mating patterns, attack, endgames), 16 openings to practice, endgame technique against Stockfish |
+| **Learn** | 30 lessons (tactics, mating patterns, attack, endgames), 26 openings to practice, endgame technique against Stockfish |
 | **Analysis** | Every game is saved: accuracy, mistakes, evaluation graph, time usage, review by the coach; free analysis board with FEN/PGN |
 | **Stats** | Rating, puzzle rating, bullet rating, win rate then vs. now, strengths and weaknesses |
 
