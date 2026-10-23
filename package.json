@@ -1,5 +1,5 @@
 {
-  "name": "gpt-schach",
+  "name": "gpt-chess",
   "version": "1.0.0",
   "description": "Schach-Training wie bei den großen Seiten – Bots, Coach mit deinem eigenen ChatGPT-Abo, Puzzles, Lektionen, Analyse und Bullet. Läuft lokal.",
   "scripts": {

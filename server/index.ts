@@ -13,6 +13,12 @@ const CODEX_BASE = 'https://chatgpt.com/backend-api/codex';
 const CLIENT_VERSION = process.env.CODEX_CLIENT_VERSION ?? '0.163.0';
 
 const app = express();
+// Alte Adresse (vor der Umbenennung) auf die neue umleiten
+app.use((req, res, next) => {
+  const host = req.headers.host ?? '';
+  if (host.startsWith('gpt-schach.localhost')) return res.redirect(301, `http://${host.replace('gpt-schach', 'gpt-chess')}${req.originalUrl}`);
+  next();
+});
 app.use(express.json({ limit: '5mb' }));
 app.use(langMiddleware);
 
@@ -268,5 +274,5 @@ if (fs.existsSync(dist)) {
 }
 
 // Nur lokal erreichbar – IPv4 und IPv6, damit *.localhost-Adressen im Browser direkt funktionieren
-app.listen(PORT, '127.0.0.1', () => console.log(`GPT-Schach Server läuft auf ${APP_URL}`));
+app.listen(PORT, '127.0.0.1', () => console.log(`GPT Chess Server läuft auf ${APP_URL}`));
 app.listen(PORT, '::1').on('error', () => {});

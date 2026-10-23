@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Chessground } from 'chessground';
 import type { Api } from 'chessground/api';
 import type { Key } from 'chessground/types';
@@ -6,6 +6,7 @@ import type { DrawShape } from 'chessground/draw';
 import { Chess, SQUARES } from 'chess.js';
 import { ClassIcon } from './ui';
 import type { Classification } from '../coach';
+import { getPieceSet } from '../lib/appearance';
 
 interface Props {
   fen: string;
@@ -40,6 +41,8 @@ export function Board({ fen, orientation, movable: movableProp, lastMove, shapes
   const cg = useRef<Api | null>(null);
   const onMoveRef = useRef(onMove);
   onMoveRef.current = onMove;
+  /** Vorgemerkter Zug – wird wie bei chess.com als halbtransparente Figur auf dem Zielfeld gezeigt */
+  const [premove, setPremove] = useState<{ orig: string; dest: string; piece: string } | null>(null);
 
   useEffect(() => {
     cg.current = Chessground(el.current!, {
@@ -47,7 +50,16 @@ export function Board({ fen, orientation, movable: movableProp, lastMove, shapes
       viewOnly,
       coordinates: true,
       highlight: { lastMove: true, check: true },
-      premovable: { enabled: false },
+      premovable: {
+        enabled: false,
+        events: {
+          set: (orig, dest) => {
+            const p = cg.current?.state.pieces.get(orig);
+            setPremove(p ? { orig, dest, piece: (p.color === 'white' ? 'w' : 'b') + (p.role === 'knight' ? 'N' : p.role[0].toUpperCase()) } : null);
+          },
+          unset: () => setPremove(null),
+        },
+      },
       drawable: { enabled: true },
       movable: { free: false, showDests: true, events: { after: (o, d) => onMoveRef.current(o, d) } },
     });
@@ -70,7 +82,10 @@ export function Board({ fen, orientation, movable: movableProp, lastMove, shapes
       },
       premovable: { enabled: !!premoveColor },
     });
-    if (!premoveColor) cg.current?.cancelPremove();
+    if (!premoveColor) {
+      cg.current?.cancelPremove();
+      setPremove(null);
+    }
     // Vorgemerkten Zug sofort ausführen, sobald man am Zug ist
     else if (movable === turn) cg.current?.playPremove();
   }, [fen, orientation, movable, lastMove, premoveColor]);
@@ -92,9 +107,23 @@ export function Board({ fen, orientation, movable: movableProp, lastMove, shapes
     );
   }
 
+  let ghostEl = null;
+  if (premove) {
+    const f = premove.dest.charCodeAt(0) - 97;
+    const r = Number(premove.dest[1]);
+    const col = orientation === 'white' ? f : 7 - f;
+    const row = orientation === 'white' ? 8 - r : r - 1;
+    ghostEl = (
+      <div className="premove-ghost" style={{ left: `${col * 12.5}%`, top: `${row * 12.5}%` }}>
+        <img src={`/pieces/${getPieceSet()}/${premove.piece}.svg`} alt="" />
+      </div>
+    );
+  }
+
   return (
     <>
       <div ref={el} className="cg-wrap-outer" />
+      {ghostEl}
       {badgeEl}
     </>
   );

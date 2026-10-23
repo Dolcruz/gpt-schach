@@ -7,6 +7,10 @@ import './variation.css';
 import './bullet.css';
 import './crowns.css';
 import './explore.css';
+import './pieces.css';
 import { App } from './App';
+import { applyAppearance } from './lib/appearance';
+
+applyAppearance();
 
 createRoot(document.getElementById('root')!).render(<App />);

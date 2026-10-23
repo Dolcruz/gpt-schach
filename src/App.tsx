@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Bot, CalendarDays, GraduationCap, History, Languages, Microscope, Puzzle, TrendingUp, Zap } from 'lucide-react';
+import { BookOpen, Bot, CalendarDays, GraduationCap, History, Languages, Microscope, Paintbrush, Puzzle, TrendingUp, Zap } from 'lucide-react';
+import { AppearanceDialog } from './components/AppearanceDialog';
 import { api, type AuthInfo } from './api';
 import { AccountBar, type CoachSettings } from './components/AccountBar';
 import { Home, type GameSetup } from './components/Home';
@@ -47,6 +48,7 @@ export function App() {
   const [settings, setSettings] = useState<CoachSettings>(loadSettings);
   const [setup, setSetup] = useState<GameSetup | null>(null);
   const [gameKey, setGameKey] = useState(0);
+  const [design, setDesign] = useState(false);
   const [route, param] = useRoute();
 
   useEffect(() => {
@@ -95,7 +97,7 @@ export function App() {
         <button className="logo" onClick={() => navigate('coach')}>
           <Piece type="n" color="w" size={30} />
           <span>
-            GPT-<b>Schach</b>
+            GPT <b>Chess</b>
           </span>
         </button>
         <nav>
@@ -113,9 +115,13 @@ export function App() {
               {l.toUpperCase()}
             </button>
           ))}
+          <button className="design-btn" onClick={() => setDesign(true)} title={L('Brett & Figuren', 'Board & pieces')}>
+            <Paintbrush size={13} /> {L('Design', 'Theme')}
+          </button>
         </div>
       </aside>
       <main>{content}</main>
+      {design && <AppearanceDialog onClose={() => setDesign(false)} />}
     </div>
   );
 }

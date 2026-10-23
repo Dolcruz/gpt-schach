@@ -1,5 +1,5 @@
-' GPT-Schach unsichtbar starten (Windows-Verknuepfung): baut bei Bedarf neu,
-' startet den Server auf Port 80 und oeffnet http://gpt-schach.localhost
+' GPT Chess unsichtbar starten (Windows-Verknuepfung): baut bei Bedarf neu,
+' startet den Server auf Port 80 und oeffnet http://gpt-chess.localhost
 Option Explicit
 Dim fso, sh, root
 Set fso = CreateObject("Scripting.FileSystemObject")

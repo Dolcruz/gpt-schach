@@ -1,4 +1,4 @@
-// GPT-Schach starten: baut die App bei Bedarf, startet den lokalen Server und öffnet den Browser.
+// GPT Chess starten: baut die App bei Bedarf, startet den lokalen Server und öffnet den Browser.
 // Aufruf: npm start   (Port per PORT=… änderbar)
 import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -6,7 +6,7 @@ import path from 'node:path';
 
 const root = import.meta.dirname;
 const PORT = process.env.PORT ?? '8080';
-const HOST = process.env.APP_HOST ?? 'gpt-schach.localhost';
+const HOST = process.env.APP_HOST ?? 'gpt-chess.localhost';
 const APP_URL = `http://${HOST}${PORT === '80' ? '' : `:${PORT}`}`;
 
 function newestMtime(dir) {
@@ -34,7 +34,7 @@ async function isUp() {
 }
 
 if (await isUp()) {
-  console.log(`GPT-Schach läuft bereits: ${APP_URL}`);
+  console.log(`GPT Chess läuft bereits: ${APP_URL}`);
   openBrowser(APP_URL);
   process.exit(0);
 }
@@ -58,5 +58,5 @@ process.on('SIGINT', () => server.kill());
 process.on('SIGTERM', () => server.kill());
 
 for (let i = 0; i < 60 && !(await isUp()); i++) await new Promise((r) => setTimeout(r, 250));
-console.log(`\n  ♞ GPT-Schach läuft: ${APP_URL}\n  Beenden mit Strg+C\n`);
+console.log(`\n  ♞ GPT Chess läuft: ${APP_URL}\n  Beenden mit Strg+C\n`);
 openBrowser(APP_URL);

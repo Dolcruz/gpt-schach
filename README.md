@@ -1,11 +1,11 @@
-# ♞ GPT-Schach
+# ♞ GPT Chess
 
 **Chess training with an AI coach – running locally on your machine, powered by your own ChatGPT subscription.**
 Bots with personalities, a coach that explains every move, unlimited tactics puzzles, lessons, an opening trainer, game review, bullet training and stats – no extra subscription, no chess-site account.
 
 The app is available in **English and German** (switch at the bottom left).
 
-![GPT-Schach – bots with crowns](docs/screenshot-bots.png)
+![GPT Chess – bots with crowns](docs/screenshot-bots.png)
 
 ---
 
@@ -20,6 +20,7 @@ The app is available in **English and German** (switch at the bottom left).
 | **Puzzles** | Unlimited tactics puzzles from the open Lichess database, daily puzzle, your own puzzle rating, theme filter |
 | **Learn** | 30 lessons (tactics, mating patterns, attack, endgames), 26 openings to practice, endgame technique against Stockfish |
 | **Analysis** | Every game is saved: accuracy, mistakes, evaluation graph, time usage, review by the coach; free analysis board with FEN/PGN |
+| **Design** | 8 piece sets and 6 board colors (bottom left → Theme), premoves are shown on the board like on the big sites |
 | **Stats** | Rating, puzzle rating, bullet rating, win rate then vs. now, strengths and weaknesses |
 
 The chess engine (Stockfish 17.1) runs right in your browser. The coach uses your ChatGPT account – without signing in, everything works except the written explanations.
@@ -41,7 +42,7 @@ npm install
 npm start
 ```
 
-Your browser opens automatically at **http://gpt-schach.localhost:8080**. On first start the app is built once (a few seconds). Stop it with `Ctrl + C`.
+Your browser opens automatically at **http://gpt-chess.localhost:8080**. On first start the app is built once (a few seconds). Stop it with `Ctrl + C`.
 
 ### Windows: desktop icon
 
@@ -49,7 +50,7 @@ Your browser opens automatically at **http://gpt-schach.localhost:8080**. On fir
 npm run shortcut
 ```
 
-Creates "GPT-Schach" on your desktop and in the Start menu. A double-click starts everything invisibly in the background and opens **http://gpt-schach.localhost**. To stop it, double-click `stop.vbs` in the folder.
+Creates "GPT Chess" on your desktop and in the Start menu. A double-click starts everything invisibly in the background and opens **http://gpt-chess.localhost**. To stop it, double-click `stop.vbs` in the folder.
 
 ### Updating
 
@@ -102,10 +103,11 @@ Structure: `src/` (React frontend), `server/` (login, coach proxy, data store, p
 
 ## License & credits
 
-GPT-Schach is licensed under the **GNU GPL v3** (see [LICENSE](LICENSE)).
+GPT Chess is licensed under the **GNU GPL v3** (see [LICENSE](LICENSE)).
 
 - [Stockfish](https://stockfishchess.org) & [stockfish.js](https://github.com/nmrugg/stockfish.js) – GPL-3.0
 - [chessground](https://github.com/lichess-org/chessground) (board & cburnett pieces) – GPL-3.0
+- Extra piece sets from [lichess](https://github.com/lichess-org/lila) – merida (GPL-2.0+), chessnut (Apache-2.0), staunty/maestro/cardinal/fresca by sadsnake1 and california by Jerry S. (CC BY-NC-SA 4.0), see [public/pieces/LICENSES.md](public/pieces/LICENSES.md)
 - [chess.js](https://github.com/jhlywa/chess.js) – BSD-2-Clause
 - [DiceBear](https://www.dicebear.com) (avatars, styles "Avataaars" and "Bottts" by Pablo Stanley) – see their licenses
 - [Lucide](https://lucide.dev) icons – ISC
