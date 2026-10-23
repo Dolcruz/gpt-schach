@@ -36,8 +36,8 @@ The chess engine (Stockfish 17.1) runs right in your browser. The coach uses you
 You need **[Node.js](https://nodejs.org) 20 or newer** (just install the LTS version) and **[Git](https://git-scm.com)** – or download the repo as a ZIP (green "Code" button → "Download ZIP") and unpack it.
 
 ```bash
-git clone https://github.com/Dolcruz/gpt-schach.git
-cd gpt-schach
+git clone https://github.com/Dolcruz/gpt-chess.git
+cd gpt-chess
 npm install
 npm start
 ```
@@ -119,4 +119,4 @@ GPT Chess is licensed under the **GNU GPL v3** (see [LICENSE](LICENSE)).
 
 Lokale Schach-App mit KI-Coach über dein eigenes ChatGPT-Abo: Bots mit Kronen, Puzzles, Lektionen, Eröffnungstrainer, Analyse, Bullet und Statistik. Die App ist komplett auf Deutsch und Englisch verfügbar (Umschalter links unten).
 
-**Installation:** Node.js ab Version 20 installieren, dann `git clone https://github.com/Dolcruz/gpt-schach.git`, `cd gpt-schach`, `npm install`, `npm start`. Unter Windows legt `npm run shortcut` ein Desktop-Symbol an. Links unten mit ChatGPT anmelden – fertig. Alle Daten bleiben lokal im Ordner `data/`.
+**Installation:** Node.js ab Version 20 installieren, dann `git clone https://github.com/Dolcruz/gpt-chess.git`, `cd gpt-chess`, `npm install`, `npm start`. Unter Windows legt `npm run shortcut` ein Desktop-Symbol an. Links unten mit ChatGPT anmelden – fertig. Alle Daten bleiben lokal im Ordner `data/`.
